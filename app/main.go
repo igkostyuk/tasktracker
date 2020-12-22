@@ -44,7 +44,7 @@ func run(logger *zap.Logger) error {
 	// /debug/vars - Added to the default mux by importing the expvar package.
 	logger.Info("main: Initializing debugging support")
 	go func() { // Not concerned with shutting this down when the application is shutdown.
-		logger.Sugar().Infof("main: Debug linstening", cfg.DebugHost)
+		logger.Sugar().Infof("main: Debug linstening: %s", cfg.DebugHost)
 		if err := http.ListenAndServe(cfg.DebugHost, http.DefaultServeMux); err != nil {
 			logger.Error("main: Debug Listener closed :", zap.Error(err))
 		}
