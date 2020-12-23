@@ -8,8 +8,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/go-chi/chi"
 	"github.com/igkostyuk/tasktracker/app/config"
+	"github.com/igkostyuk/tasktracker/app/handlers"
 	zapLogger "github.com/igkostyuk/tasktracker/app/logger"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -54,15 +54,11 @@ func run(logger *zap.Logger) error {
 	// Use a buffered channel because the signal package requires it.
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
-	r := chi.NewRouter()
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte("hi"))
-	})
 
 	// nolint:exhaustivestruct
 	api := http.Server{
 		Addr:         cfg.APIHost,
-		Handler:      r,
+		Handler:      handlers.API(logger),
 		ReadTimeout:  cfg.ReadTimeout,
 		WriteTimeout: cfg.WriteTimeout,
 	}

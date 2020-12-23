@@ -9,7 +9,7 @@ func New(build string) (*zap.Logger, error) {
 	case "production":
 		return productionConfig().Build()
 	default:
-		return zap.NewDevelopment()
+		return developmentConfig().Build()
 	}
 }
 
