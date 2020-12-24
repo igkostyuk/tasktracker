@@ -1,10 +1,10 @@
 package config
 
 import (
+	"fmt"
 	"time"
 
 	cfg "github.com/Yalantis/go-config"
-	"github.com/pkg/errors"
 )
 
 type (
@@ -35,7 +35,7 @@ func FromFile(path string) (Config, error) {
 	var config Config
 	err := cfg.Init(&config, path)
 	if err != nil {
-		return config, errors.Wrapf(err, "init path: %s", path)
+		return config, fmt.Errorf("init path %s: %w", path, err)
 	}
 
 	return config, nil

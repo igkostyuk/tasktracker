@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -12,7 +13,6 @@ import (
 	"github.com/igkostyuk/tasktracker/app/handlers"
 	zapLogger "github.com/igkostyuk/tasktracker/app/logger"
 	"github.com/igkostyuk/tasktracker/store/postgres"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
@@ -42,7 +42,7 @@ func run(cfg config.Config, logger *zap.Logger) error {
 	logger.Info("main: Initializing database support")
 	db, err := postgres.Open(cfg.Postgres)
 	if err != nil {
-		return errors.Wrap(err, "connecting to db")
+		return fmt.Errorf("connecting to db: %w", err)
 	}
 	defer func() {
 		log.Printf("main: Database Stopping")
@@ -81,7 +81,7 @@ func run(cfg config.Config, logger *zap.Logger) error {
 	// =========================================================================
 	select { // Blocking main and waiting for shutdown.
 	case err := <-serverErrors:
-		return errors.Wrap(err, "server error")
+		return fmt.Errorf("server error: %w", err)
 	case sig := <-shutdown:
 		logger.Sugar().Infof("main: %v : Start shutdown", sig)
 		// Give outstanding requests a deadline for completion.
@@ -91,7 +91,7 @@ func run(cfg config.Config, logger *zap.Logger) error {
 		if err := api.Shutdown(ctx); err != nil {
 			api.Close()
 
-			return errors.Wrap(err, "could not stop server gracefully")
+			return fmt.Errorf("could not stop server gracefully: %w", err)
 		}
 	}
 
