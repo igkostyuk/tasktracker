@@ -1,0 +1,30 @@
+
+networks:
+  shared-network:
+    driver: bridge
+
+services:
+
+  db:
+    container_name: tasktracker_db
+    environment:
+      - POSTGRES_PASSWORD=mysecretpassword
+    networks:
+      - shared-network
+    image: postgres:13-alpine
+    ports:
+      - 5432:5432      
+
+  tasktracker-api:
+    container_name: tasktracker-api 
+    environment:
+      - POSTGRES_HOST=tasktracker_db:5432
+    networks:
+      - shared-network
+    image: tasktracker-api-amd64:1.0
+    command: ./tasktracker-api 
+    ports:
+      - 3000:3000 # CRUD API
+      - 4000:4000 # DEBUG API
+    depends_on:
+      - db

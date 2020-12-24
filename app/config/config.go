@@ -26,6 +26,7 @@ type (
 		MaxRetries   int           `envconfig:"API_POSTGRES_MAX_RETRIES"   default:"5"`
 		ReadTimeout  time.Duration `envconfig:"API_POSTGRES_READ_TIMEOUT"  default:"10s"`
 		WriteTimeout time.Duration `envconfig:"API_POSTGRES_WRITE_TIMEOUT" default:"10s"`
+		DisableTLS   bool          `envconfig:"API_POSTGRES_DISABLE_TLS"   default:"true"`
 	}
 )
 

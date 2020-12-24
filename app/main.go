@@ -11,6 +11,7 @@ import (
 	"github.com/igkostyuk/tasktracker/app/config"
 	"github.com/igkostyuk/tasktracker/app/handlers"
 	zapLogger "github.com/igkostyuk/tasktracker/app/logger"
+	"github.com/igkostyuk/tasktracker/store/postgres"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
@@ -23,22 +24,31 @@ func main() {
 	if err != nil {
 		log.Fatal("building logger", err)
 	}
+	c, err := config.FromFile("")
+	if err != nil {
+		log.Fatal("parsing config", err)
+	}
 
-	if err := run(zl); err != nil {
+	if err := run(c, zl); err != nil {
 		zl.Error("main: error:", zap.Error(err))
 		os.Exit(1)
 	}
 }
 
-func run(logger *zap.Logger) error {
-	// Configuration
-	cfg, err := config.FromFile("")
-	if err != nil {
-		return errors.Wrap(err, "parsing config")
-	}
+func run(cfg config.Config, logger *zap.Logger) error {
 	logger.Info("main: Started : Application initializing.")
 	defer logger.Info("main: Completed")
+	// =========================================================================
 	logger.Info("main: Initializing database support")
+	db, err := postgres.Open(cfg.Postgres)
+	if err != nil {
+		return errors.Wrap(err, "connecting to db")
+	}
+	defer func() {
+		log.Printf("main: Database Stopping")
+		db.Close()
+	}()
+	// =========================================================================
 	// Start Debug Service
 	// /debug/pprof - Added to the default mux by importing the net/http/pprof package.
 	// /debug/vars - Added to the default mux by importing the expvar package.
@@ -68,6 +78,7 @@ func run(logger *zap.Logger) error {
 		logger.Sugar().Infof("main: API listening on %s", api.Addr)
 		serverErrors <- api.ListenAndServe()
 	}()
+	// =========================================================================
 	select { // Blocking main and waiting for shutdown.
 	case err := <-serverErrors:
 		return errors.Wrap(err, "server error")
