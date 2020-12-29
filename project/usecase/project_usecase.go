@@ -14,7 +14,11 @@ func New(p domain.ProjectRepository) domain.ProjectUsecase {
 	return &projectUsecase{projectRepo: p}
 }
 
-func (p *projectUsecase) GetByID(ctx context.Context, id int64) (domain.Project, error) {
+func (p *projectUsecase) Fetch(ctx context.Context) ([]domain.Project, error) {
+	return p.projectRepo.Fetch(ctx)
+}
+
+func (p *projectUsecase) GetByID(ctx context.Context, id string) (domain.Project, error) {
 	return p.projectRepo.GetByID(ctx, id)
 }
 
@@ -26,6 +30,6 @@ func (p *projectUsecase) Store(ctx context.Context, m *domain.Project) error {
 	return p.projectRepo.Store(ctx, m)
 }
 
-func (p *projectUsecase) Delete(ctx context.Context, id int64) error {
+func (p *projectUsecase) Delete(ctx context.Context, id string) error {
 	return p.projectRepo.Delete(ctx, id)
 }

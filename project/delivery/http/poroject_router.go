@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/go-chi/chi"
 	"github.com/go-playground/validator"
@@ -22,9 +21,10 @@ func New(us domain.ProjectUsecase) chi.Router {
 	}
 	r := chi.NewRouter()
 	r.Route("/", func(r chi.Router) {
+		r.Get("/", handler.FetchProject)
+		r.Post("/", handler.Store)
 		r.Route("/{projectID}", func(r chi.Router) {
 			r.Get("/", handler.GetByID)
-			r.Post("/", handler.GetByID)
 			r.Delete("/", handler.Delete)
 		})
 	})
@@ -32,19 +32,28 @@ func New(us domain.ProjectUsecase) chi.Router {
 	return r
 }
 
-// GetByID will get project by given id.
-func (p *projectHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	idP, err := strconv.Atoi(chi.URLParam(r, "projectID"))
+func (p *projectHandler) FetchProject(w http.ResponseWriter, r *http.Request) {
+	projects, err := p.projectUsecase.Fetch(r.Context())
 	if err != nil {
-		http.Error(w, domain.ErrNotFound.Error(), http.StatusNotFound)
+		http.Error(w, err.Error(), getStatusCode(err))
 
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	err = json.NewEncoder(w).Encode(&projects)
+	if err != nil {
+		http.Error(w, "encoding error", http.StatusInternalServerError)
+	}
+}
 
-	id := int64(idP)
+// GetByID will get project by given id.
+func (p *projectHandler) GetByID(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "projectID")
+
 	ctx := r.Context()
 
-	comm, err := p.projectUsecase.GetByID(ctx, id)
+	project, err := p.projectUsecase.GetByID(ctx, id)
 	if err != nil {
 		http.Error(w, err.Error(), getStatusCode(err))
 
@@ -53,7 +62,7 @@ func (p *projectHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode(&comm)
+	err = json.NewEncoder(w).Encode(&project)
 	if err != nil {
 		http.Error(w, "encoding error", http.StatusInternalServerError)
 	}
@@ -104,17 +113,11 @@ func (p *projectHandler) Store(w http.ResponseWriter, r *http.Request) {
 
 // Delete will delete project by given param.
 func (p *projectHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	idP, err := strconv.Atoi(chi.URLParam(r, "id"))
-	if err != nil {
-		http.Error(w, domain.ErrNotFound.Error(), http.StatusNotFound)
+	id := chi.URLParam(r, "projectID")
 
-		return
-	}
-
-	id := int64(idP)
 	ctx := r.Context()
 
-	err = p.projectUsecase.Delete(ctx, id)
+	err := p.projectUsecase.Delete(ctx, id)
 	if err != nil {
 		http.Error(w, err.Error(), getStatusCode(err))
 
