@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/igkostyuk/tasktracker/app/config"
+	"github.com/igkostyuk/tasktracker/configs"
 
 	// The database driver in use.
 	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
-func Open(cfg config.Postgres) (*sql.DB, error) {
+func Open(cfg configs.Postgres) (*sql.DB, error) {
 	q := make(url.Values)
 	if cfg.DisableTLS {
 		q.Set("sslmode", "disable")
