@@ -47,11 +47,13 @@ func (c *columnRepository) fetch(ctx context.Context, query string, args ...inte
 
 func (c *columnRepository) Fetch(ctx context.Context) ([]domain.Column, error) {
 	query := `SELECT id,position,name,status,project_id FROM columns`
+
 	return c.fetch(ctx, query)
 }
 
 func (c *columnRepository) FetchByProjectID(ctx context.Context, id string) ([]domain.Column, error) {
 	query := `SELECT id,position,name,status,project_id FROM columns WHERE project_id = $1`
+
 	return c.fetch(ctx, query, id)
 }
 
@@ -84,6 +86,7 @@ func (c *columnRepository) Update(ctx context.Context, cl *domain.Column) error 
 	if err != nil {
 		return fmt.Errorf("update error: %w", err)
 	}
+
 	return nil
 }
 
@@ -94,6 +97,7 @@ func (c *columnRepository) Store(ctx context.Context, a *domain.Column) error {
 	if err != nil {
 		return fmt.Errorf("store error: %w", err)
 	}
+
 	return nil
 }
 
@@ -103,5 +107,6 @@ func (c *columnRepository) Delete(ctx context.Context, id string) error {
 	if err != nil {
 		return fmt.Errorf("delete error: %w", err)
 	}
+
 	return nil
 }

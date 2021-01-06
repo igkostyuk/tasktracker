@@ -52,10 +52,7 @@ func (p *projectHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 
 func (p *projectHandler) FetchColumns(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "projectID")
-
-	ctx := r.Context()
-
-	columns, err := p.projectUsecase.FetchColumns(ctx, id)
+	columns, err := p.projectUsecase.FetchColumns(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), getStatusCode(err))
 
@@ -63,7 +60,7 @@ func (p *projectHandler) FetchColumns(w http.ResponseWriter, r *http.Request) {
 	}
 	jsonData, err := json.Marshal(columns)
 	if err != nil {
-		http.Error(w, "encoding error", http.StatusInternalServerError)
+		http.Error(w, "columns encoding error", http.StatusInternalServerError)
 
 		return
 	}
@@ -75,10 +72,7 @@ func (p *projectHandler) FetchColumns(w http.ResponseWriter, r *http.Request) {
 // GetByID will get project by given id.
 func (p *projectHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "projectID")
-
-	ctx := r.Context()
-
-	project, err := p.projectUsecase.GetByID(ctx, id)
+	project, err := p.projectUsecase.GetByID(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), getStatusCode(err))
 
@@ -87,7 +81,7 @@ func (p *projectHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 
 	jsonData, err := json.Marshal(project)
 	if err != nil {
-		http.Error(w, "encoding error", http.StatusInternalServerError)
+		http.Error(w, "project encoding error", http.StatusInternalServerError)
 
 		return
 	}
@@ -145,10 +139,7 @@ func (p *projectHandler) Store(w http.ResponseWriter, r *http.Request) {
 // Delete will delete project by given param.
 func (p *projectHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "projectID")
-
-	ctx := r.Context()
-
-	err := p.projectUsecase.Delete(ctx, id)
+	err := p.projectUsecase.Delete(r.Context(), id)
 	if err != nil {
 		http.Error(w, err.Error(), getStatusCode(err))
 

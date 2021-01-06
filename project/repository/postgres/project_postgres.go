@@ -67,6 +67,7 @@ func (p *projectRepository) Update(ctx context.Context, pr *domain.Project) erro
 	if err != nil {
 		return fmt.Errorf("update error: %w", err)
 	}
+
 	return nil
 }
 
@@ -77,6 +78,7 @@ func (p *projectRepository) Store(ctx context.Context, a *domain.Project) error 
 	if err != nil {
 		return fmt.Errorf("store error: %w", err)
 	}
+
 	return nil
 }
 
@@ -86,5 +88,6 @@ func (p *projectRepository) Delete(ctx context.Context, id string) error {
 	if err != nil {
 		return fmt.Errorf("delete error: %w", err)
 	}
+
 	return nil
 }

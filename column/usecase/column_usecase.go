@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/igkostyuk/tasktracker/domain"
 )
@@ -52,14 +53,15 @@ func (c *columnUsecase) Store(ctx context.Context, m *domain.Column) error {
 func (c *columnUsecase) Delete(ctx context.Context, id string) error {
 	column, err := c.columnRepo.GetByID(ctx, id)
 	if err != nil {
-		return err
+		return fmt.Errorf("get column by id: %w", err)
 	}
 	columns, err := c.FetchByProjectID(ctx, column.ProjectID)
 	if err != nil {
-		return err
+		return fmt.Errorf("fetch project by id: %w", err)
 	}
 	if len(columns) == 1 {
 		return domain.ErrLastColumn
 	}
+
 	return c.columnRepo.Delete(ctx, id)
 }

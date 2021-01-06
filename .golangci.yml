@@ -30,6 +30,7 @@ linters-settings:
 linters:
   enable-all: true
   disable:
+    - dupl
     - goerr113
     - maligned
     - gochecknoglobals

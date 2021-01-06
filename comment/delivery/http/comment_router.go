@@ -97,7 +97,7 @@ func (c *commentHandler) Store(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-	if err := c.commentUsecase.Store(r.Context(), &comment); err != nil {
+	if err = c.commentUsecase.Store(r.Context(), &comment); err != nil {
 		http.Error(w, err.Error(), getStatusCode(err))
 
 		return

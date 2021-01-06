@@ -48,6 +48,8 @@ github.com/jackc/pgx/v4/stdlib
 github.com/leodido/go-urn
 # github.com/lib/pq v1.9.0
 ## explicit
+# github.com/matryer/moq v0.1.4
+## explicit
 # github.com/pkg/errors v0.9.1
 ## explicit
 # github.com/shopspring/decimal v1.2.0

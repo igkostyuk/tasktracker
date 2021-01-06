@@ -117,7 +117,7 @@ func (t *taskHandler) Store(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-	if err := t.taskUsecase.Store(r.Context(), &task); err != nil {
+	if err = t.taskUsecase.Store(r.Context(), &task); err != nil {
 		http.Error(w, err.Error(), getStatusCode(err))
 
 		return

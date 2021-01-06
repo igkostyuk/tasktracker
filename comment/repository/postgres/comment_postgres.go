@@ -45,11 +45,13 @@ func (c *commentRepository) fetch(ctx context.Context, query string, args ...int
 
 func (c *commentRepository) Fetch(ctx context.Context) ([]domain.Comment, error) {
 	query := `SELECT id, text, task_id FROM comments`
+
 	return c.fetch(ctx, query)
 }
 
 func (c *commentRepository) FetchByTaskID(ctx context.Context, id string) ([]domain.Comment, error) {
 	query := `SELECT id, text, task_id FROM comments WHERE task_id = $1`
+
 	return c.fetch(ctx, query, id)
 }
 

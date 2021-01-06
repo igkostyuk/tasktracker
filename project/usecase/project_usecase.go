@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/igkostyuk/tasktracker/domain"
 )
@@ -34,16 +35,18 @@ func (p *projectUsecase) Update(ctx context.Context, pr *domain.Project) error {
 func (p *projectUsecase) Store(ctx context.Context, m *domain.Project) error {
 	err := p.projectRepo.Store(ctx, m)
 	if err != nil {
-		return err
+		return fmt.Errorf("store project: %w", err)
 	}
+	// nolint:exhaustivestruct
 	err = p.columnRepo.Store(ctx, &domain.Column{
 		Name:      "Default",
 		Status:    "Default",
 		ProjectID: m.ID,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("store default column: %w", err)
 	}
+
 	return nil
 }
 

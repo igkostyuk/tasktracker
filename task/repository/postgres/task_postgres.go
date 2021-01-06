@@ -47,16 +47,19 @@ func (t *taskRepository) fetch(ctx context.Context, query string, args ...interf
 
 func (t *taskRepository) Fetch(ctx context.Context) ([]domain.Task, error) {
 	query := `SELECT id, position, name, description, column_id FROM tasks`
+
 	return t.fetch(ctx, query)
 }
 
 func (t *taskRepository) FetchByColumnID(ctx context.Context, id string) ([]domain.Task, error) {
 	query := `SELECT id, position, name, description, column_id FROM tasks WHERE column_id = $1`
+
 	return t.fetch(ctx, query, id)
 }
 
 func (t *taskRepository) FetchByProjectID(ctx context.Context, id string) ([]domain.Task, error) {
 	query := `SELECT id, position, name, description, column_id FROM tasks WHERE project_id = $1`
+
 	return t.fetch(ctx, query, id)
 }
 

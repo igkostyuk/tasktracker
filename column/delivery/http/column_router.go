@@ -118,7 +118,7 @@ func (c *columnHandler) Store(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-	if err := c.columnUsecase.Store(r.Context(), &column); err != nil {
+	if err = c.columnUsecase.Store(r.Context(), &column); err != nil {
 		http.Error(w, err.Error(), getStatusCode(err))
 
 		return
