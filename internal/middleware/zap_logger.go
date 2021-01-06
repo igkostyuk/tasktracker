@@ -23,7 +23,6 @@ func (l *zapStructuredLogger) NewLogEntry(r *http.Request) LogEntry {
 		zap.String("request", r.RequestURI),
 		zap.String("remote", r.RemoteAddr),
 	)
-	l.Logger.Info("request started", fields...)
 
 	return &zapStructuredLoggerEntry{Logger: l.Logger, fields: fields}
 }

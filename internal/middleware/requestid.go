@@ -12,11 +12,11 @@ var RequestIDHeader = "X-Request-Id"
 type contextKey string
 
 const (
-	requestIDKey contextKey = "request_id"
+	RequestIDKey contextKey = "request_id"
 )
 
 func GetRequestID(ctx context.Context) (value string) {
-	value, ok := ctx.Value(requestIDKey).(string)
+	value, ok := ctx.Value(RequestIDKey).(string)
 	if !ok {
 		return ""
 	}
@@ -25,7 +25,7 @@ func GetRequestID(ctx context.Context) (value string) {
 }
 
 func WithRequestID(ctx context.Context, value string) context.Context {
-	return context.WithValue(ctx, requestIDKey, value)
+	return context.WithValue(ctx, RequestIDKey, value)
 }
 
 func RequestID(next http.Handler) http.Handler {
