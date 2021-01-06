@@ -15,36 +15,61 @@ type projectHandler struct {
 	projectUsecase domain.ProjectUsecase
 }
 
+// New return routes for project resource.
 func New(us domain.ProjectUsecase) chi.Router {
 	handler := &projectHandler{
 		projectUsecase: us,
 	}
 	r := chi.NewRouter()
-	r.Route("/", func(r chi.Router) {
-		r.Get("/", handler.FetchProject)
-		r.Post("/", handler.Store)
-		r.Route("/{projectID}", func(r chi.Router) {
-			r.Get("/", handler.GetByID)
-			r.Delete("/", handler.Delete)
-		})
+	r.Get("/", handler.Fetch)
+	r.Post("/", handler.Store)
+	r.Route("/{projectID}", func(r chi.Router) {
+		r.Get("/", handler.GetByID)
+		r.Delete("/", handler.Delete)
+		r.Get("/columns", handler.FetchColumns)
 	})
 
 	return r
 }
 
-func (p *projectHandler) FetchProject(w http.ResponseWriter, r *http.Request) {
+func (p *projectHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 	projects, err := p.projectUsecase.Fetch(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), getStatusCode(err))
 
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode(&projects)
+	jsonData, err := json.Marshal(projects)
 	if err != nil {
 		http.Error(w, "encoding error", http.StatusInternalServerError)
+
+		return
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
+}
+
+func (p *projectHandler) FetchColumns(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "projectID")
+
+	ctx := r.Context()
+
+	columns, err := p.projectUsecase.FetchColumns(ctx, id)
+	if err != nil {
+		http.Error(w, err.Error(), getStatusCode(err))
+
+		return
+	}
+	jsonData, err := json.Marshal(columns)
+	if err != nil {
+		http.Error(w, "encoding error", http.StatusInternalServerError)
+
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
 }
 
 // GetByID will get project by given id.
@@ -60,12 +85,15 @@ func (p *projectHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode(&project)
+	jsonData, err := json.Marshal(project)
 	if err != nil {
 		http.Error(w, "encoding error", http.StatusInternalServerError)
+
+		return
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
 }
 
 func isRequestValid(m *domain.Project) (bool, error) {
@@ -103,12 +131,15 @@ func (p *projectHandler) Store(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	err = json.NewEncoder(w).Encode(&project)
+	jsonData, err := json.Marshal(project)
 	if err != nil {
 		http.Error(w, "encoding error", http.StatusInternalServerError)
+
+		return
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	w.Write(jsonData)
 }
 
 // Delete will delete project by given param.
