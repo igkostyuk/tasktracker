@@ -4,11 +4,13 @@ import (
 	"context"
 )
 
-// Project ...
+//go:generate moq -out ./mock/project.go -pkg mocks . ProjectUsecase ProjectRepository
+
+// Project represent a project in tasktracker.
 type Project struct {
 	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name        string `json:"name" validate:"required,min=1,max=500"`
+	Description string `json:"description" validate:"required,min=0,max=1000"`
 }
 
 // ProjectUsecase represent the project's usecases.
@@ -18,6 +20,7 @@ type ProjectUsecase interface {
 	Update(ctx context.Context, pr *Project) error
 	Store(context.Context, *Project) error
 	Delete(ctx context.Context, id string) error
+	FetchColumns(ctx context.Context, id string) ([]Column, error)
 }
 
 // ProjectRepository represent the project's repository contract.

@@ -11,4 +11,8 @@ var (
 	ErrConflict = errors.New("item already exist")
 	// ErrBadParamInput will throw if the given request-body or params is not valid.
 	ErrBadParamInput = errors.New("given param is not valid")
+	// ErrLastColumn will throw if trying to delete the last column.
+	ErrLastColumn = errors.New("the last column cannot be deleted")
+	// ErrColumnName will throw if column name not unique for project.
+	ErrColumnName = errors.New("column name must be unique")
 )
