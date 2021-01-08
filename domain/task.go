@@ -9,7 +9,7 @@ import (
 // Task represent a task in tasktracker.
 type Task struct {
 	ID          string `json:"id"`
-	Position    string `json:"position"`
+	Position    int64  `json:"position"`
 	Name        string `json:"name" validate:"required,min=1,max=500"`
 	Description string `json:"description" validate:"required,min=0,max=5000"`
 	ColumnID    string `json:"column_id" validate:"required,uuid4"`

@@ -10,10 +10,11 @@ import (
 type projectUsecase struct {
 	projectRepo domain.ProjectRepository
 	columnRepo  domain.ColumnRepository
+	taskRepo    domain.TaskRepository
 }
 
-func New(p domain.ProjectRepository, c domain.ColumnRepository) domain.ProjectUsecase {
-	return &projectUsecase{projectRepo: p, columnRepo: c}
+func New(p domain.ProjectRepository, c domain.ColumnRepository, t domain.TaskRepository) domain.ProjectUsecase {
+	return &projectUsecase{projectRepo: p, columnRepo: c, taskRepo: t}
 }
 
 func (p *projectUsecase) Fetch(ctx context.Context) ([]domain.Project, error) {
@@ -22,6 +23,10 @@ func (p *projectUsecase) Fetch(ctx context.Context) ([]domain.Project, error) {
 
 func (p *projectUsecase) FetchColumns(ctx context.Context, id string) ([]domain.Column, error) {
 	return p.columnRepo.FetchByProjectID(ctx, id)
+}
+
+func (p *projectUsecase) FetchTasks(ctx context.Context, id string) ([]domain.Task, error) {
+	return p.taskRepo.FetchByProjectID(ctx, id)
 }
 
 func (p *projectUsecase) GetByID(ctx context.Context, id string) (domain.Project, error) {

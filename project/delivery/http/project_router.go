@@ -27,6 +27,7 @@ func New(us domain.ProjectUsecase) chi.Router {
 		r.Get("/", handler.GetByID)
 		r.Delete("/", handler.Delete)
 		r.Get("/columns", handler.FetchColumns)
+		r.Get("/tasks", handler.FetchTasks)
 	})
 
 	return r
@@ -59,6 +60,25 @@ func (p *projectHandler) FetchColumns(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	jsonData, err := json.Marshal(columns)
+	if err != nil {
+		http.Error(w, "columns encoding error", http.StatusInternalServerError)
+
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
+}
+
+func (p *projectHandler) FetchTasks(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "projectID")
+	tasks, err := p.projectUsecase.FetchTasks(r.Context(), id)
+	if err != nil {
+		http.Error(w, err.Error(), getStatusCode(err))
+
+		return
+	}
+	jsonData, err := json.Marshal(tasks)
 	if err != nil {
 		http.Error(w, "columns encoding error", http.StatusInternalServerError)
 

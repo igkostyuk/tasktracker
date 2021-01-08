@@ -21,6 +21,7 @@ type ProjectUsecase interface {
 	Store(context.Context, *Project) error
 	Delete(ctx context.Context, id string) error
 	FetchColumns(ctx context.Context, id string) ([]Column, error)
+	FetchTasks(ctx context.Context, id string) ([]Task, error)
 }
 
 // ProjectRepository represent the project's repository contract.
