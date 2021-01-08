@@ -13,7 +13,12 @@ services:
       - shared-network
     image: postgres:13-alpine
     ports:
-      - 5432:5432      
+      - 5432:5432
+    healthcheck:
+      test: "pg_isready -h localhost -p 5432 -q -U postgres"
+      interval: 3s
+      timeout: 5s
+      retries: 5
 
   tasktracker-api:
     container_name: tasktracker-api 
@@ -27,4 +32,5 @@ services:
       - 3000:3000 # CRUD API
       - 4000:4000 # DEBUG API
     depends_on:
-      - db
+      db:
+        condition: service_healthy
