@@ -1,9 +1,27 @@
+# github.com/KyleBanks/depth v1.2.1
+github.com/KyleBanks/depth
+# github.com/PuerkitoBio/purell v1.1.1
+github.com/PuerkitoBio/purell
+# github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578
+github.com/PuerkitoBio/urlesc
 # github.com/Yalantis/go-config v1.0.0
 ## explicit
 github.com/Yalantis/go-config
-# github.com/go-chi/chi v1.5.1
+# github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
+## explicit
+github.com/alecthomas/template
+github.com/alecthomas/template/parse
+# github.com/go-chi/chi v4.0.2+incompatible
 ## explicit
 github.com/go-chi/chi
+# github.com/go-openapi/jsonpointer v0.19.5
+github.com/go-openapi/jsonpointer
+# github.com/go-openapi/jsonreference v0.19.5
+github.com/go-openapi/jsonreference
+# github.com/go-openapi/spec v0.20.0
+github.com/go-openapi/spec
+# github.com/go-openapi/swag v0.19.12
+github.com/go-openapi/swag
 # github.com/go-playground/locales v0.13.0
 github.com/go-playground/locales
 github.com/go-playground/locales/currency
@@ -41,19 +59,32 @@ github.com/jackc/pgtype
 github.com/jackc/pgx/v4
 github.com/jackc/pgx/v4/internal/sanitize
 github.com/jackc/pgx/v4/stdlib
-# github.com/kr/text v0.2.0
-## explicit
+# github.com/josharian/intern v1.0.0
+github.com/josharian/intern
 # github.com/leodido/go-urn v1.2.1
 ## explicit
 github.com/leodido/go-urn
 # github.com/lib/pq v1.9.0
 ## explicit
-# github.com/matryer/moq v0.1.4
-## explicit
+# github.com/mailru/easyjson v0.7.6
+github.com/mailru/easyjson/buffer
+github.com/mailru/easyjson/jlexer
+github.com/mailru/easyjson/jwriter
 # github.com/pkg/errors v0.9.1
 ## explicit
+# github.com/rs/cors v1.7.0
+## explicit
+github.com/rs/cors
 # github.com/shopspring/decimal v1.2.0
 ## explicit
+# github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14
+github.com/swaggo/files
+# github.com/swaggo/http-swagger v1.0.0
+## explicit
+github.com/swaggo/http-swagger
+# github.com/swaggo/swag v1.7.0
+## explicit
+github.com/swaggo/swag
 # go.uber.org/atomic v1.7.0
 go.uber.org/atomic
 # go.uber.org/multierr v1.6.0
@@ -74,6 +105,10 @@ golang.org/x/crypto/pbkdf2
 ## explicit
 # golang.org/x/mod v0.4.0
 ## explicit
+# golang.org/x/net v0.0.0-20201207224615-747e23833adb
+golang.org/x/net/idna
+golang.org/x/net/webdav
+golang.org/x/net/webdav/internal/xml
 # golang.org/x/text v0.3.4
 golang.org/x/text/cases
 golang.org/x/text/internal
@@ -90,6 +125,10 @@ golang.org/x/text/unicode/norm
 golang.org/x/text/width
 # golang.org/x/tools v0.0.0-20201226215659-b1c90890d22a
 ## explicit
+golang.org/x/tools/go/ast/astutil
+golang.org/x/tools/go/buildutil
+golang.org/x/tools/go/internal/cgo
+golang.org/x/tools/go/loader
 # golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1
 golang.org/x/xerrors
 golang.org/x/xerrors/internal
@@ -98,8 +137,6 @@ golang.org/x/xerrors/internal
 # gopkg.in/go-playground/assert.v1 v1.2.1
 ## explicit
 # gopkg.in/yaml.v2 v2.4.0
-## explicit
-# gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
-## explicit
+gopkg.in/yaml.v2
 # honnef.co/go/tools v0.1.0
 ## explicit

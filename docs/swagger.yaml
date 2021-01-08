@@ -1,0 +1,246 @@
+basePath: /v1
+definitions:
+  domain.Column:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      position:
+        type: integer
+      project_id:
+        type: string
+      status:
+        type: string
+    required:
+    - name
+    - project_id
+    - status
+    type: object
+  domain.Project:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    required:
+    - description
+    - name
+    type: object
+  domain.Task:
+    properties:
+      column_id:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      position:
+        type: integer
+    required:
+    - column_id
+    - description
+    - name
+    type: object
+  web.HTTPError:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+info:
+  contact: {}
+  title: Task Tracker API
+  version: "1.0"
+paths:
+  /projects:
+    get:
+      description: fetch projects
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Project'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: List projects
+      tags:
+      - projects
+    post:
+      consumes:
+      - application/json
+      description: add by json project
+      parameters:
+      - description: Add project
+        in: body
+        name: account
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Project'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Project'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Add an project
+      tags:
+      - projects
+  /projects/{id}:
+    delete:
+      description: Delete by project ID
+      parameters:
+      - description: project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: it's ok
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Delete a project
+      tags:
+      - projects
+    get:
+      description: get project by id
+      parameters:
+      - description: project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Project'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Show a account
+      tags:
+      - projects
+  /projects/{id}/columns:
+    get:
+      description: fetch columns by project id
+      parameters:
+      - description: project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Column'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: List columns
+      tags:
+      - projects
+  /projects/{id}/tasks:
+    get:
+      description: fetch tasks by project id
+      parameters:
+      - description: project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Task'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: List tasks
+      tags:
+      - projects
+swagger: "2.0"
