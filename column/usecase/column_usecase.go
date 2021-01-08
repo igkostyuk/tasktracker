@@ -33,21 +33,31 @@ func (c *columnUsecase) GetByID(ctx context.Context, id string) (domain.Column, 
 }
 
 func (c *columnUsecase) Update(ctx context.Context, pr *domain.Column) error {
-	return c.columnRepo.Update(ctx, pr)
-}
-
-func (c *columnUsecase) Store(ctx context.Context, m *domain.Column) error {
-	columns, err := c.FetchByProjectID(ctx, m.ProjectID)
+	columns, err := c.columnRepo.FetchByProjectID(ctx, pr.ProjectID)
 	if err != nil {
-		return err
+		return fmt.Errorf("fetch by project id: %w", err)
 	}
 	for _, column := range columns {
-		if column.Name == m.Name {
+		if column.Name == pr.Name {
 			return domain.ErrColumnName
 		}
 	}
 
-	return c.columnRepo.Store(ctx, m)
+	return c.columnRepo.Update(ctx, pr)
+}
+
+func (c *columnUsecase) Store(ctx context.Context, cm *domain.Column) error {
+	columns, err := c.columnRepo.FetchByProjectID(ctx, cm.ProjectID)
+	if err != nil {
+		return fmt.Errorf("fetch by project id: %w", err)
+	}
+	for _, column := range columns {
+		if column.Name == cm.Name {
+			return domain.ErrColumnName
+		}
+	}
+
+	return c.columnRepo.Store(ctx, cm)
 }
 
 func (c *columnUsecase) Delete(ctx context.Context, id string) error {
@@ -55,13 +65,20 @@ func (c *columnUsecase) Delete(ctx context.Context, id string) error {
 	if err != nil {
 		return fmt.Errorf("get column by id: %w", err)
 	}
-	columns, err := c.FetchByProjectID(ctx, column.ProjectID)
+	columns, err := c.columnRepo.FetchByProjectID(ctx, column.ProjectID)
 	if err != nil {
-		return fmt.Errorf("fetch project by id: %w", err)
+		return fmt.Errorf("fetch columns by project id: %w", err)
 	}
 	if len(columns) == 1 {
 		return domain.ErrLastColumn
 	}
-
+	tasks, err := c.taskRepo.FetchByColumnID(ctx, column.ID)
+	if err != nil {
+		return fmt.Errorf("fetch tasks by column id: %w", err)
+	}
+	if len(tasks) == 0 {
+		return c.columnRepo.Delete(ctx, id)
+	}
+	// TODO move tasks and change position
 	return c.columnRepo.Delete(ctx, id)
 }
