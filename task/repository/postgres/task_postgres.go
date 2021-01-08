@@ -46,19 +46,20 @@ func (t *taskRepository) fetch(ctx context.Context, query string, args ...interf
 }
 
 func (t *taskRepository) Fetch(ctx context.Context) ([]domain.Task, error) {
-	query := `SELECT id, position, name, description, column_id FROM tasks`
+	query := `SELECT id, position, name, description, colum_id FROM tasks`
 
 	return t.fetch(ctx, query)
 }
 
 func (t *taskRepository) FetchByColumnID(ctx context.Context, id string) ([]domain.Task, error) {
-	query := `SELECT id, position, name, description, column_id FROM tasks WHERE column_id = $1`
+	query := `SELECT id, position, name, description, colum_id FROM tasks WHERE colum_id = $1`
 
 	return t.fetch(ctx, query, id)
 }
 
 func (t *taskRepository) FetchByProjectID(ctx context.Context, id string) ([]domain.Task, error) {
-	query := `SELECT id, position, name, description, column_id FROM tasks WHERE project_id = $1`
+	query := `SELECT id, position, name, description, colum_id FROM tasks WHERE colum_id IN 
+	(SELECT id FROM columns WHERE project_id = $1)`
 
 	return t.fetch(ctx, query, id)
 }
@@ -81,29 +82,38 @@ func (t *taskRepository) getOne(ctx context.Context, query string, args ...inter
 }
 
 func (t *taskRepository) GetByID(ctx context.Context, id string) (domain.Task, error) {
-	query := `SELECT id, position, name, description, column_id FROM tasks WHERE id = $1`
+	query := `SELECT id, position, name, description, colum_id FROM tasks WHERE id = $1`
 
 	return t.getOne(ctx, query, id)
 }
 
 func (t *taskRepository) Update(ctx context.Context, tk *domain.Task) error {
-	query := `UPDATE tasks SET position=$2, name=$3, description=$4, column_id=$5 FROM tasks WHERE id = $1`
+	query := `UPDATE tasks SET position=$2, name=$3, description=$4, colum_id=$5 FROM tasks WHERE id = $1`
 	_, err := t.db.ExecContext(ctx, query, tk.ID, tk.Position, tk.Name, tk.Description, tk.ColumnID)
+	if err != nil {
+		return fmt.Errorf("update error: %w", err)
+	}
 
-	return fmt.Errorf("update error: %w", err)
+	return nil
 }
 
 func (t *taskRepository) Store(ctx context.Context, ts *domain.Task) error {
-	query := `INSERT INTO tasks (position, name, description, column_id) VALUES ( $1, $2, $3, $4) RETURNING id`
+	query := `INSERT INTO tasks (position, name, description, colum_id) VALUES ( $1, $2, $3, $4) RETURNING id`
 	row := t.db.QueryRowContext(ctx, query, ts.Position, ts.Name, ts.Description, ts.ColumnID)
 	err := row.Scan(&ts.ID)
+	if err != nil {
+		return fmt.Errorf("store error: %w", err)
+	}
 
-	return fmt.Errorf("store error: %w", err)
+	return nil
 }
 
 func (t *taskRepository) Delete(ctx context.Context, id string) error {
 	query := `DELETE FROM tasks WHERE id = $1`
 	_, err := t.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return fmt.Errorf("delete error: %w", err)
+	}
 
-	return fmt.Errorf("delete error: %w", err)
+	return nil
 }
