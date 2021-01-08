@@ -79,21 +79,30 @@ func (c *commentRepository) GetByID(ctx context.Context, id string) (domain.Comm
 func (c *commentRepository) Update(ctx context.Context, cm *domain.Comment) error {
 	query := `UPDATE comments SET taxt=$2, task_id=$3 FROM comments WHERE id = $1`
 	_, err := c.db.ExecContext(ctx, query, cm.ID, cm.Text, cm.TaskID)
+	if err != nil {
+		return fmt.Errorf("update error: %w", err)
+	}
 
-	return fmt.Errorf("update error: %w", err)
+	return nil
 }
 
 func (c *commentRepository) Store(ctx context.Context, ct *domain.Comment) error {
 	query := `INSERT INTO comments (text, task_id) VALUES ( $1, $2) RETURNING id`
 	row := c.db.QueryRowContext(ctx, query, ct.Text, ct.TaskID)
 	err := row.Scan(&ct.ID)
+	if err != nil {
+		return fmt.Errorf("store error: %w", err)
+	}
 
-	return fmt.Errorf("store error: %w", err)
+	return nil
 }
 
 func (c *commentRepository) Delete(ctx context.Context, id string) error {
 	query := `DELETE FROM comments WHERE id = $1`
 	_, err := c.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return fmt.Errorf("delete error: %w", err)
+	}
 
-	return fmt.Errorf("delete error: %w", err)
+	return nil
 }
