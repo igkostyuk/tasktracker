@@ -34,9 +34,9 @@ func New(us domain.ProjectUsecase) chi.Router {
 	return r
 }
 
-// Fetch godoc
-// @Summary List projects
-// @Description fetch projects
+// Fetch project godoc
+// @Summary Get all projects
+// @Description get all projects
 // @Tags projects
 // @Produce  json
 // @Success 200 {array} domain.Project
@@ -44,6 +44,7 @@ func New(us domain.ProjectUsecase) chi.Router {
 // @Failure 409 {object} web.HTTPError
 // @Failure 500 {object} web.HTTPError
 // @Router /projects [get]
+// Fetch will fetch projects.
 func (p *projectHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 	projects, err := p.projectUsecase.Fetch(r.Context())
 	if err != nil {
@@ -55,16 +56,17 @@ func (p *projectHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 }
 
 // FetchColumns godoc
-// @Summary List columns
-// @Description fetch columns by project id
+// @Summary Get columns by project id
+// @Description get columns by project id
 // @Tags projects
 // @Produce  json
-// @Param  id path string true "project ID"
+// @Param  id path string true "project ID" format(uuid)
 // @Success 200 {array} domain.Column
 // @Failure 404 {object} web.HTTPError
 // @Failure 409 {object} web.HTTPError
 // @Failure 500 {object} web.HTTPError
 // @Router /projects/{id}/columns [get]
+// FetchColumns will fetch columns by project id.
 func (p *projectHandler) FetchColumns(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "projectID")
 	columns, err := p.projectUsecase.FetchColumns(r.Context(), id)
@@ -77,16 +79,17 @@ func (p *projectHandler) FetchColumns(w http.ResponseWriter, r *http.Request) {
 }
 
 // FetchTasks godoc
-// @Summary List tasks
-// @Description fetch tasks by project id
+// @Summary Get tasks by project id
+// @Description get tasks by project id
 // @Tags projects
 // @Produce  json
-// @Param  id path string true "project ID"
+// @Param  id path string true "project ID" format(uuid)
 // @Success 200 {array} domain.Task
 // @Failure 404 {object} web.HTTPError
 // @Failure 409 {object} web.HTTPError
 // @Failure 500 {object} web.HTTPError
 // @Router /projects/{id}/tasks [get]
+// FetchTasks will fetch tasks by project id.
 func (p *projectHandler) FetchTasks(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "projectID")
 	tasks, err := p.projectUsecase.FetchTasks(r.Context(), id)
@@ -98,18 +101,18 @@ func (p *projectHandler) FetchTasks(w http.ResponseWriter, r *http.Request) {
 	web.Respond(w, tasks, http.StatusOK)
 }
 
-// GetByID will get project by given id.
 // GetByID godoc
-// @Summary Show a account
+// @Summary Show a project
 // @Description get project by id
 // @Tags projects
 // @Produce  json
-// @Param  id path string true "project ID"
+// @Param  id path string true "project ID" format(uuid)
 // @Success 200 {object} domain.Project
 // @Failure 404 {object} web.HTTPError
 // @Failure 409 {object} web.HTTPError
 // @Failure 500 {object} web.HTTPError
 // @Router /projects/{id} [get]
+// GetByID will get project by given id.
 func (p *projectHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "projectID")
 	project, err := p.projectUsecase.GetByID(r.Context(), id)
@@ -131,46 +134,42 @@ func isRequestValid(m *domain.Project) (bool, error) {
 	return true, nil
 }
 
-// Store will store the project by given request body.
 // Store godoc
-// @Summary Add an project
+// @Summary Add a project
 // @Description add by json project
 // @Tags projects
 // @Accept  json
 // @Produce  json
-// @Param account body domain.Project true "Add project"
+// @Param project body domain.Project true "Add project"
 // @Success 200 {object} domain.Project
+// @Failure 400 {object} web.HTTPError
 // @Failure 404 {object} web.HTTPError
 // @Failure 409 {object} web.HTTPError
+// @Failure 422 {object} web.HTTPError
 // @Failure 500 {object} web.HTTPError
 // @Router /projects [post]
+// Store will store the project by given request body.
 func (p *projectHandler) Store(w http.ResponseWriter, r *http.Request) {
 	var project domain.Project
-	err := json.NewDecoder(r.Body).Decode(&project)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+	if err := json.NewDecoder(r.Body).Decode(&project); err != nil {
+		web.RespondError(w, err, http.StatusUnprocessableEntity)
 
 		return
 	}
-
-	var ok bool
-	if ok, err = isRequestValid(&project); !ok {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if ok, err := isRequestValid(&project); !ok {
+		web.RespondError(w, err, http.StatusBadRequest)
 
 		return
 	}
-
-	ctx := r.Context()
-	err = p.projectUsecase.Store(ctx, &project)
-	if err != nil {
+	if err := p.projectUsecase.Store(r.Context(), &project); err != nil {
 		web.RespondError(w, err, getStatusCode(err))
 
 		return
 	}
+
 	web.Respond(w, project, http.StatusOK)
 }
 
-// Delete will delete project by given param.
 // Delete godoc
 // @Summary Delete a project
 // @Description Delete by project ID
@@ -182,15 +181,15 @@ func (p *projectHandler) Store(w http.ResponseWriter, r *http.Request) {
 // @Failure 409 {object} web.HTTPError
 // @Failure 500 {object} web.HTTPError
 // @Router /projects/{id} [delete]
+// Delete will delete project by given param.
 func (p *projectHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "projectID")
-	err := p.projectUsecase.Delete(r.Context(), id)
-	if err != nil {
+	if err := p.projectUsecase.Delete(r.Context(), id); err != nil {
 		web.RespondError(w, err, getStatusCode(err))
 
 		return
 	}
-	web.Respond(w, map[string]interface{}{}, http.StatusNoContent)
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func getStatusCode(err error) int {

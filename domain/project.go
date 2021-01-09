@@ -8,7 +8,7 @@ import (
 
 // Project represent a project in tasktracker.
 type Project struct {
-	ID          string `json:"id"`
+	ID          string `json:"id" readonly:"true"`
 	Name        string `json:"name" validate:"required,min=1,max=500"`
 	Description string `json:"description" validate:"required,min=0,max=1000"`
 }

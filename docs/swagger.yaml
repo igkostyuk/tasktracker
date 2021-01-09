@@ -3,6 +3,7 @@ definitions:
   domain.Column:
     properties:
       id:
+        readOnly: true
         type: string
       name:
         type: string
@@ -17,11 +18,25 @@ definitions:
     - project_id
     - status
     type: object
+  domain.Comment:
+    properties:
+      id:
+        readOnly: true
+        type: string
+      task_id:
+        type: string
+      text:
+        type: string
+    required:
+    - task_id
+    - text
+    type: object
   domain.Project:
     properties:
       description:
         type: string
       id:
+        readOnly: true
         type: string
       name:
         type: string
@@ -36,6 +51,7 @@ definitions:
       description:
         type: string
       id:
+        readOnly: true
         type: string
       name:
         type: string
@@ -58,9 +74,299 @@ info:
   title: Task Tracker API
   version: "1.0"
 paths:
+  /columns:
+    get:
+      description: get all columns
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Column'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Get all columns
+      tags:
+      - columns
+    post:
+      consumes:
+      - application/json
+      description: add by json column
+      parameters:
+      - description: Add column
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Column'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Column'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Add a column
+      tags:
+      - columns
+  /columns/{id}:
+    delete:
+      description: Delete by column ID
+      parameters:
+      - description: column ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: it's ok
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Delete a column
+      tags:
+      - columns
+    get:
+      description: get column by id
+      parameters:
+      - description: column ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Column'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Show a column
+      tags:
+      - columns
+  /columns/{id}/tasks:
+    get:
+      description: get tasks by column id
+      parameters:
+      - description: column ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Task'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Get tasks by column id
+      tags:
+      - columns
+  /comments:
+    get:
+      description: get all comments
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Comment'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Get all comments
+      tags:
+      - comments
+    post:
+      consumes:
+      - application/json
+      description: add by json comment
+      parameters:
+      - description: Add comment
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Comment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Add a comment
+      tags:
+      - comments
+  /comments/{id}:
+    delete:
+      description: Delete by comment ID
+      parameters:
+      - description: comment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: it's ok
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Delete a comment
+      tags:
+      - comments
+    get:
+      description: get comment by id
+      parameters:
+      - description: comment ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Comment'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Show a comment
+      tags:
+      - comments
   /projects:
     get:
-      description: fetch projects
+      description: get all projects
       produces:
       - application/json
       responses:
@@ -82,7 +388,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.HTTPError'
-      summary: List projects
+      summary: Get all projects
       tags:
       - projects
     post:
@@ -92,7 +398,7 @@ paths:
       parameters:
       - description: Add project
         in: body
-        name: account
+        name: project
         required: true
         schema:
           $ref: '#/definitions/domain.Project'
@@ -103,6 +409,10 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/domain.Project'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.HTTPError'
         "404":
           description: Not Found
           schema:
@@ -111,11 +421,15 @@ paths:
           description: Conflict
           schema:
             $ref: '#/definitions/web.HTTPError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/web.HTTPError'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.HTTPError'
-      summary: Add an project
+      summary: Add a project
       tags:
       - projects
   /projects/{id}:
@@ -151,6 +465,7 @@ paths:
       description: get project by id
       parameters:
       - description: project ID
+        format: uuid
         in: path
         name: id
         required: true
@@ -174,14 +489,15 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.HTTPError'
-      summary: Show a account
+      summary: Show a project
       tags:
       - projects
   /projects/{id}/columns:
     get:
-      description: fetch columns by project id
+      description: get columns by project id
       parameters:
       - description: project ID
+        format: uuid
         in: path
         name: id
         required: true
@@ -207,14 +523,15 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.HTTPError'
-      summary: List columns
+      summary: Get columns by project id
       tags:
       - projects
   /projects/{id}/tasks:
     get:
-      description: fetch tasks by project id
+      description: get tasks by project id
       parameters:
       - description: project ID
+        format: uuid
         in: path
         name: id
         required: true
@@ -240,7 +557,169 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.HTTPError'
-      summary: List tasks
+      summary: Get tasks by project id
       tags:
       - projects
+  /tasks:
+    get:
+      description: get all tasks
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Task'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Get all tasks
+      tags:
+      - tasks
+    post:
+      consumes:
+      - application/json
+      description: add by json task
+      parameters:
+      - description: Add task
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Task'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Task'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Add a task
+      tags:
+      - tasks
+  /tasks/{id}:
+    delete:
+      description: Delete by task ID
+      parameters:
+      - description: task ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: it's ok
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Delete a task
+      tags:
+      - tasks
+    get:
+      description: get task by id
+      parameters:
+      - description: task ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Task'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Show a task
+      tags:
+      - tasks
+  /tasks/{id}/comments:
+    get:
+      description: get tasks by task id
+      parameters:
+      - description: task ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Task'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Get comments by task id
+      tags:
+      - tasks
 swagger: "2.0"

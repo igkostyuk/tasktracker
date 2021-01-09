@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-playground/validator"
 	"github.com/igkostyuk/tasktracker/domain"
+	"github.com/igkostyuk/tasktracker/internal/web"
 )
 
 type columnHandler struct {
@@ -32,65 +33,71 @@ func New(us domain.ColumnUsecase) chi.Router {
 	return r
 }
 
+// Fetch column godoc
+// @Summary Get all columns
+// @Description get all columns
+// @Tags columns
+// @Produce  json
+// @Success 200 {array} domain.Column
+// @Failure 404 {object} web.HTTPError
+// @Failure 409 {object} web.HTTPError
+// @Failure 500 {object} web.HTTPError
+// @Router /columns [get]
+// Fetch will fetch columns.
 func (c *columnHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 	columns, err := c.columnUsecase.Fetch(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), getStatusCode(err))
+		web.RespondError(w, err, getStatusCode(err))
 
 		return
 	}
-	jsonData, err := json.Marshal(columns)
-	if err != nil {
-		http.Error(w, "encoding error", http.StatusInternalServerError)
-
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(jsonData)
+	web.Respond(w, columns, http.StatusOK)
 }
 
+// FetchTasks godoc
+// @Summary Get tasks by column id
+// @Description get tasks by column id
+// @Tags columns
+// @Produce  json
+// @Param  id path string true "column ID" format(uuid)
+// @Success 200 {array} domain.Task
+// @Failure 404 {object} web.HTTPError
+// @Failure 409 {object} web.HTTPError
+// @Failure 500 {object} web.HTTPError
+// @Router /columns/{id}/tasks [get]
+// FetchTasks will fetch tasks by column id.
 func (c *columnHandler) FetchTasks(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "columnID")
 	tasks, err := c.columnUsecase.FetchTasks(r.Context(), id)
 	if err != nil {
-		http.Error(w, err.Error(), getStatusCode(err))
+		web.RespondError(w, err, getStatusCode(err))
 
 		return
 	}
-	jsonData, err := json.Marshal(tasks)
-	if err != nil {
-		http.Error(w, "encoding error", http.StatusInternalServerError)
-
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(jsonData)
+	web.Respond(w, tasks, http.StatusOK)
 }
 
-// GetByID will get project by given id.
+// GetByID godoc
+// @Summary Show a column
+// @Description get column by id
+// @Tags columns
+// @Produce  json
+// @Param  id path string true "column ID" format(uuid)
+// @Success 200 {object} domain.Column
+// @Failure 404 {object} web.HTTPError
+// @Failure 409 {object} web.HTTPError
+// @Failure 500 {object} web.HTTPError
+// @Router /columns/{id} [get]
+// GetByID will get column by given id.
 func (c *columnHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "columnID")
-
-	ctx := r.Context()
-
-	column, err := c.columnUsecase.GetByID(ctx, id)
+	column, err := c.columnUsecase.GetByID(r.Context(), id)
 	if err != nil {
-		http.Error(w, err.Error(), getStatusCode(err))
+		web.RespondError(w, err, getStatusCode(err))
 
 		return
 	}
-
-	jsonData, err := json.Marshal(column)
-	if err != nil {
-		http.Error(w, "encoding error", http.StatusInternalServerError)
-
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(jsonData)
+	web.Respond(w, column, http.StatusOK)
 }
 
 func isRequestValid(m *domain.Column) (bool, error) {
@@ -103,50 +110,60 @@ func isRequestValid(m *domain.Column) (bool, error) {
 	return true, nil
 }
 
-// Store will store the project by given request body.
+// Store godoc
+// @Summary Add a column
+// @Description add by json column
+// @Tags columns
+// @Accept  json
+// @Produce  json
+// @Param project body domain.Column true "Add column"
+// @Success 200 {object} domain.Column
+// @Failure 400 {object} web.HTTPError
+// @Failure 404 {object} web.HTTPError
+// @Failure 409 {object} web.HTTPError
+// @Failure 422 {object} web.HTTPError
+// @Failure 500 {object} web.HTTPError
+// @Router /columns [post]
+// Store will store the column by given request body.
 func (c *columnHandler) Store(w http.ResponseWriter, r *http.Request) {
 	var column domain.Column
-	err := json.NewDecoder(r.Body).Decode(&column)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+	if err := json.NewDecoder(r.Body).Decode(&column); err != nil {
+		web.RespondError(w, err, http.StatusUnprocessableEntity)
 
 		return
 	}
-	var ok bool
-	if ok, err = isRequestValid(&column); !ok {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if ok, err := isRequestValid(&column); !ok {
+		web.RespondError(w, err, http.StatusBadRequest)
 
 		return
 	}
-	if err = c.columnUsecase.Store(r.Context(), &column); err != nil {
-		http.Error(w, err.Error(), getStatusCode(err))
+	if err := c.columnUsecase.Store(r.Context(), &column); err != nil {
+		web.RespondError(w, err, getStatusCode(err))
 
 		return
 	}
-	jsonData, err := json.Marshal(column)
-	if err != nil {
-		http.Error(w, "encoding error", http.StatusInternalServerError)
-
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	w.Write(jsonData)
+	web.Respond(w, column, http.StatusOK)
 }
 
-// Delete will delete project by given param.
+// Delete godoc
+// @Summary Delete a column
+// @Description Delete by column ID
+// @Tags columns
+// @Produce  json
+// @Param  id path string true "column ID"
+// @Success 204 "it's ok"
+// @Failure 404 {object} web.HTTPError
+// @Failure 409 {object} web.HTTPError
+// @Failure 500 {object} web.HTTPError
+// @Router /columns/{id} [delete]
+// Delete will delete column by given param.
 func (c *columnHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "columnID")
-
-	ctx := r.Context()
-
-	err := c.columnUsecase.Delete(ctx, id)
-	if err != nil {
-		http.Error(w, err.Error(), getStatusCode(err))
+	if err := c.columnUsecase.Delete(r.Context(), id); err != nil {
+		web.RespondError(w, err, getStatusCode(err))
 
 		return
 	}
-
 	w.WriteHeader(http.StatusNoContent)
 }
 

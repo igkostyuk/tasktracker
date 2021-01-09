@@ -9,12 +9,14 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-playground/validator"
 	"github.com/igkostyuk/tasktracker/domain"
+	"github.com/igkostyuk/tasktracker/internal/web"
 )
 
 type commentHandler struct {
 	commentUsecase domain.CommentUsecase
 }
 
+// New return routes for comment resource.
 func New(us domain.CommentUsecase) chi.Router {
 	handler := &commentHandler{
 		commentUsecase: us,
@@ -22,7 +24,7 @@ func New(us domain.CommentUsecase) chi.Router {
 	r := chi.NewRouter()
 	r.Get("/", handler.Fetch)
 	r.Post("/", handler.Store)
-	r.Route("/{commmentID}", func(r chi.Router) {
+	r.Route("/{commentID}", func(r chi.Router) {
 		r.Get("/", handler.GetByID)
 		r.Delete("/", handler.Delete)
 	})
@@ -30,46 +32,48 @@ func New(us domain.CommentUsecase) chi.Router {
 	return r
 }
 
+// Fetch comments godoc
+// @Summary Get all comments
+// @Description get all comments
+// @Tags comments
+// @Produce  json
+// @Success 200 {array} domain.Comment
+// @Failure 404 {object} web.HTTPError
+// @Failure 409 {object} web.HTTPError
+// @Failure 500 {object} web.HTTPError
+// @Router /comments [get]
+// Fetch will fetch comments.
 func (c *commentHandler) Fetch(w http.ResponseWriter, r *http.Request) {
-	columns, err := c.commentUsecase.Fetch(r.Context())
+	comments, err := c.commentUsecase.Fetch(r.Context())
 	if err != nil {
-		http.Error(w, err.Error(), getStatusCode(err))
+		web.RespondError(w, err, getStatusCode(err))
 
 		return
 	}
-	jsonData, err := json.Marshal(columns)
-	if err != nil {
-		http.Error(w, "encoding error", http.StatusInternalServerError)
-
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(jsonData)
+	web.Respond(w, comments, http.StatusOK)
 }
 
+// GetByID godoc
+// @Summary Show a comment
+// @Description get comment by id
+// @Tags comments
+// @Produce  json
+// @Param  id path string true "comment ID" format(uuid)
+// @Success 200 {object} domain.Comment
+// @Failure 404 {object} web.HTTPError
+// @Failure 409 {object} web.HTTPError
+// @Failure 500 {object} web.HTTPError
+// @Router /comments/{id} [get]
 // GetByID will get comment by given id.
 func (c *commentHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "commentID")
-
-	ctx := r.Context()
-
-	comment, err := c.commentUsecase.GetByID(ctx, id)
+	comment, err := c.commentUsecase.GetByID(r.Context(), id)
 	if err != nil {
-		http.Error(w, err.Error(), getStatusCode(err))
+		web.RespondError(w, err, getStatusCode(err))
 
 		return
 	}
-
-	jsonData, err := json.Marshal(comment)
-	if err != nil {
-		http.Error(w, "encoding error", http.StatusInternalServerError)
-
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(jsonData)
+	web.Respond(w, comment, http.StatusOK)
 }
 
 func isRequestValid(m *domain.Comment) (bool, error) {
@@ -82,46 +86,57 @@ func isRequestValid(m *domain.Comment) (bool, error) {
 	return true, nil
 }
 
+// Store godoc
+// @Summary Add a comment
+// @Description add by json comment
+// @Tags comments
+// @Accept  json
+// @Produce  json
+// @Param project body domain.Comment true "Add comment"
+// @Success 200 {object} domain.Comment
+// @Failure 400 {object} web.HTTPError
+// @Failure 404 {object} web.HTTPError
+// @Failure 409 {object} web.HTTPError
+// @Failure 422 {object} web.HTTPError
+// @Failure 500 {object} web.HTTPError
+// @Router /comments [post]
 // Store will store the comment by given request body.
 func (c *commentHandler) Store(w http.ResponseWriter, r *http.Request) {
 	var comment domain.Comment
-	err := json.NewDecoder(r.Body).Decode(&comment)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
+	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
+		web.RespondError(w, err, http.StatusUnprocessableEntity)
 
 		return
 	}
-	var ok bool
-	if ok, err = isRequestValid(&comment); !ok {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if ok, err := isRequestValid(&comment); !ok {
+		web.RespondError(w, err, http.StatusBadRequest)
 
 		return
 	}
-	if err = c.commentUsecase.Store(r.Context(), &comment); err != nil {
-		http.Error(w, err.Error(), getStatusCode(err))
+	if err := c.commentUsecase.Store(r.Context(), &comment); err != nil {
+		web.RespondError(w, err, getStatusCode(err))
 
 		return
 	}
-	jsonData, err := json.Marshal(comment)
-	if err != nil {
-		http.Error(w, "encoding error", http.StatusInternalServerError)
-
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	w.Write(jsonData)
+	web.Respond(w, comment, http.StatusOK)
 }
 
+// Delete godoc
+// @Summary Delete a comment
+// @Description Delete by comment ID
+// @Tags comments
+// @Produce  json
+// @Param  id path string true "comment ID"
+// @Success 204 "it's ok"
+// @Failure 404 {object} web.HTTPError
+// @Failure 409 {object} web.HTTPError
+// @Failure 500 {object} web.HTTPError
+// @Router /comments/{id} [delete]
 // Delete will delete comment by given param.
 func (c *commentHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "commentID")
-
-	ctx := r.Context()
-
-	err := c.commentUsecase.Delete(ctx, id)
-	if err != nil {
-		http.Error(w, err.Error(), getStatusCode(err))
+	if err := c.commentUsecase.Delete(r.Context(), id); err != nil {
+		web.RespondError(w, err, getStatusCode(err))
 
 		return
 	}
@@ -138,10 +153,6 @@ func getStatusCode(err error) int {
 	case errors.Is(err, domain.ErrNotFound):
 		return http.StatusNotFound
 	case errors.Is(err, domain.ErrConflict):
-		return http.StatusConflict
-	case errors.Is(err, domain.ErrLastColumn):
-		return http.StatusConflict
-	case errors.Is(err, domain.ErrColumnName):
 		return http.StatusConflict
 	default:
 		return http.StatusInternalServerError

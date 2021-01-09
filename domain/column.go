@@ -8,7 +8,7 @@ import (
 
 // Column represent a columns in tasktracker.
 type Column struct {
-	ID        string `json:"id"`
+	ID        string `json:"id" readonly:"true"`
 	Position  int64  `json:"position"`
 	Name      string `json:"name" validate:"required,min=1,max=255"`
 	Status    string `json:"status" validate:"required,min=1,max=255"`

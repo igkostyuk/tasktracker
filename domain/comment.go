@@ -8,7 +8,7 @@ import (
 
 // Comment represent a comment in tasktracker.
 type Comment struct {
-	ID     string `json:"id"`
+	ID     string `json:"id" readonly:"true"`
 	Text   string `json:"text" validate:"required,min=1,max=5000"`
 	TaskID string `json:"task_id" validate:"required,uuid4"`
 }
