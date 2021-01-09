@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/igkostyuk/tasktracker/domain"
@@ -12,6 +13,7 @@ type taskRepository struct {
 	db *sql.DB
 }
 
+// New will create new a TaskRepository object representation of domain.TaskRepository interface.
 func New(db *sql.DB) domain.TaskRepository {
 	return &taskRepository{db: db}
 }
@@ -74,6 +76,9 @@ func (t *taskRepository) getOne(ctx context.Context, query string, args ...inter
 		&res.Description,
 		&res.ColumnID,
 	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.Task{}, fmt.Errorf("task: %w", domain.ErrNotFound)
+	}
 	if err != nil {
 		return domain.Task{}, fmt.Errorf("getOne error: %w", err)
 	}

@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/igkostyuk/tasktracker/domain"
@@ -12,6 +13,7 @@ type projectRepository struct {
 	db *sql.DB
 }
 
+// New will create new a projectRepository object representation of domain.ProjectRepository interface.
 func New(db *sql.DB) domain.ProjectRepository {
 	return &projectRepository{db: db}
 }
@@ -48,6 +50,9 @@ func (p *projectRepository) getOne(ctx context.Context, query string, args ...in
 	row := p.db.QueryRowContext(ctx, query, args...)
 	res := domain.Project{}
 	err := row.Scan(&res.ID, &res.Name, &res.Description)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.Project{}, fmt.Errorf("project: %w", domain.ErrNotFound)
+	}
 	if err != nil {
 		return domain.Project{}, fmt.Errorf("getOne error: %w", err)
 	}

@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/igkostyuk/tasktracker/domain"
 )
@@ -11,6 +12,7 @@ type taskUsecase struct {
 	commentRepo domain.CommentRepository
 }
 
+// New will create new a TaskUsecase object representation of domain.TaskUsecase interface.
 func New(t domain.TaskRepository, c domain.CommentRepository) domain.TaskUsecase {
 	return &taskUsecase{taskRepo: t, commentRepo: c}
 }
@@ -20,6 +22,10 @@ func (t *taskUsecase) Fetch(ctx context.Context) ([]domain.Task, error) {
 }
 
 func (t *taskUsecase) FetchComments(ctx context.Context, id string) ([]domain.Comment, error) {
+	if _, err := t.taskRepo.GetByID(ctx, id); err != nil {
+		return nil, fmt.Errorf("fetch comments by task id: %w", err)
+	}
+
 	return t.commentRepo.FetchByTaskID(ctx, id)
 }
 
@@ -44,5 +50,9 @@ func (t *taskUsecase) Store(ctx context.Context, m *domain.Task) error {
 }
 
 func (t *taskUsecase) Delete(ctx context.Context, id string) error {
+	if _, err := t.taskRepo.GetByID(ctx, id); err != nil {
+		return fmt.Errorf("delete task: %w", err)
+	}
+
 	return t.taskRepo.Delete(ctx, id)
 }

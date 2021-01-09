@@ -12,6 +12,7 @@ type columnUsecase struct {
 	taskRepo   domain.TaskRepository
 }
 
+// New will create new a ColumnUsecase object representation of domain.ColumnUsecase interface.
 func New(c domain.ColumnRepository, t domain.TaskRepository) domain.ColumnUsecase {
 	return &columnUsecase{columnRepo: c, taskRepo: t}
 }
@@ -21,6 +22,10 @@ func (c *columnUsecase) Fetch(ctx context.Context) ([]domain.Column, error) {
 }
 
 func (c *columnUsecase) FetchTasks(ctx context.Context, id string) ([]domain.Task, error) {
+	if _, err := c.columnRepo.GetByID(ctx, id); err != nil {
+		return nil, fmt.Errorf("fetch tasks by column id: %w", err)
+	}
+
 	return c.taskRepo.FetchByColumnID(ctx, id)
 }
 

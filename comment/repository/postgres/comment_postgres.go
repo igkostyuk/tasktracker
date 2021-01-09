@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/igkostyuk/tasktracker/domain"
@@ -12,6 +13,7 @@ type commentRepository struct {
 	db *sql.DB
 }
 
+// New will create new a CommentRepository object representation of domain.CommentRepository interface.
 func New(db *sql.DB) domain.CommentRepository {
 	return &commentRepository{db: db}
 }
@@ -63,6 +65,9 @@ func (c *commentRepository) getOne(ctx context.Context, query string, args ...in
 		&res.Text,
 		&res.TaskID,
 	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.Comment{}, fmt.Errorf("comment: %w", domain.ErrNotFound)
+	}
 	if err != nil {
 		return domain.Comment{}, fmt.Errorf("getOne error: %w", err)
 	}

@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/igkostyuk/tasktracker/domain"
@@ -12,6 +13,7 @@ type columnRepository struct {
 	db *sql.DB
 }
 
+// New will create new a ColumnRepository object representation of domain.ColumnRepository interface.
 func New(db *sql.DB) domain.ColumnRepository {
 	return &columnRepository{db: db}
 }
@@ -67,6 +69,9 @@ func (c *columnRepository) getOne(ctx context.Context, query string, args ...int
 		&res.Status,
 		&res.ProjectID,
 	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return domain.Column{}, fmt.Errorf("column: %w", domain.ErrNotFound)
+	}
 	if err != nil {
 		return domain.Column{}, fmt.Errorf("getOne error: %w", err)
 	}

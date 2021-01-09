@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/igkostyuk/tasktracker/domain"
 )
@@ -10,6 +11,7 @@ type commentUsecase struct {
 	commentRepo domain.CommentRepository
 }
 
+// New will create new a CommentUsecase object representation of domain.ComentUsecase interface.
 func New(c domain.CommentRepository) domain.CommentUsecase {
 	return &commentUsecase{commentRepo: c}
 }
@@ -35,5 +37,9 @@ func (c *commentUsecase) Store(ctx context.Context, ct *domain.Comment) error {
 }
 
 func (c *commentUsecase) Delete(ctx context.Context, id string) error {
+	if _, err := c.commentRepo.GetByID(ctx, id); err != nil {
+		return fmt.Errorf("delete comment: %w", err)
+	}
+
 	return c.commentRepo.Delete(ctx, id)
 }
