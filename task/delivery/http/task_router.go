@@ -48,11 +48,11 @@ func New(us domain.TaskUsecase) chi.Router {
 func (t *taskHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 	tasks, err := t.taskUsecase.Fetch(r.Context())
 	if err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}
-	web.Respond(w, tasks, http.StatusOK)
+	web.Respond(w, r, tasks, http.StatusOK)
 }
 
 // FetchComments godoc
@@ -70,17 +70,17 @@ func (t *taskHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 func (t *taskHandler) FetchComments(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "taskID"))
 	if err != nil {
-		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+		web.RespondError(w, r, domain.ErrNotFound, http.StatusNotFound)
 
 		return
 	}
 	comments, err := t.taskUsecase.FetchComments(r.Context(), id)
 	if err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}
-	web.Respond(w, comments, http.StatusOK)
+	web.Respond(w, r, comments, http.StatusOK)
 }
 
 // GetByID godoc
@@ -98,17 +98,17 @@ func (t *taskHandler) FetchComments(w http.ResponseWriter, r *http.Request) {
 func (t *taskHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "taskID"))
 	if err != nil {
-		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+		web.RespondError(w, r, domain.ErrNotFound, http.StatusNotFound)
 
 		return
 	}
 	task, err := t.taskUsecase.GetByID(r.Context(), id)
 	if err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}
-	web.Respond(w, task, http.StatusOK)
+	web.Respond(w, r, task, http.StatusOK)
 }
 
 func isRequestValid(m *domain.Task) (bool, error) {
@@ -139,21 +139,21 @@ func isRequestValid(m *domain.Task) (bool, error) {
 func (t *taskHandler) Store(w http.ResponseWriter, r *http.Request) {
 	var task domain.Task
 	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
-		web.RespondError(w, err, http.StatusUnprocessableEntity)
+		web.RespondError(w, r, err, http.StatusUnprocessableEntity)
 
 		return
 	}
 	if ok, err := isRequestValid(&task); !ok {
-		web.RespondError(w, err, http.StatusBadRequest)
+		web.RespondError(w, r, err, http.StatusBadRequest)
 
 		return
 	}
 	if err := t.taskUsecase.Store(r.Context(), &task); err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}
-	web.Respond(w, task, http.StatusOK)
+	web.Respond(w, r, task, http.StatusOK)
 }
 
 // Delete godoc
@@ -171,12 +171,12 @@ func (t *taskHandler) Store(w http.ResponseWriter, r *http.Request) {
 func (t *taskHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "taskID"))
 	if err != nil {
-		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+		web.RespondError(w, r, domain.ErrNotFound, http.StatusNotFound)
 
 		return
 	}
 	if err := t.taskUsecase.Delete(r.Context(), id); err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}

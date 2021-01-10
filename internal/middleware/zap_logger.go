@@ -40,6 +40,15 @@ func (l *zapStructuredLoggerEntry) Write(status int, header http.Header, elapsed
 	l.Logger.Info("request complete", fields...)
 }
 
+func (l *zapStructuredLoggerEntry) WriteError(err error) {
+	fields := append(
+		l.fields,
+		zap.String("err", err.Error()),
+	)
+
+	l.Logger.Error("error", fields...)
+}
+
 func (l *zapStructuredLoggerEntry) Panic(v interface{}, stack []byte) {
 	fields := append(
 		l.fields,

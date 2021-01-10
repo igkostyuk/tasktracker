@@ -49,11 +49,11 @@ func New(us domain.ProjectUsecase) chi.Router {
 func (p *projectHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 	projects, err := p.projectUsecase.Fetch(r.Context())
 	if err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}
-	web.Respond(w, projects, http.StatusOK)
+	web.Respond(w, r, projects, http.StatusOK)
 }
 
 // FetchColumns godoc
@@ -71,17 +71,17 @@ func (p *projectHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 func (p *projectHandler) FetchColumns(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "projectID"))
 	if err != nil {
-		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+		web.RespondError(w, r, domain.ErrNotFound, http.StatusNotFound)
 
 		return
 	}
 	columns, err := p.projectUsecase.FetchColumns(r.Context(), id)
 	if err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}
-	web.Respond(w, columns, http.StatusOK)
+	web.Respond(w, r, columns, http.StatusOK)
 }
 
 // FetchTasks godoc
@@ -99,17 +99,17 @@ func (p *projectHandler) FetchColumns(w http.ResponseWriter, r *http.Request) {
 func (p *projectHandler) FetchTasks(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "projectID"))
 	if err != nil {
-		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+		web.RespondError(w, r, domain.ErrNotFound, http.StatusNotFound)
 
 		return
 	}
 	tasks, err := p.projectUsecase.FetchTasks(r.Context(), id)
 	if err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}
-	web.Respond(w, tasks, http.StatusOK)
+	web.Respond(w, r, tasks, http.StatusOK)
 }
 
 // GetByID godoc
@@ -127,17 +127,17 @@ func (p *projectHandler) FetchTasks(w http.ResponseWriter, r *http.Request) {
 func (p *projectHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "projectID"))
 	if err != nil {
-		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+		web.RespondError(w, r, domain.ErrNotFound, http.StatusNotFound)
 
 		return
 	}
 	project, err := p.projectUsecase.GetByID(r.Context(), id)
 	if err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}
-	web.Respond(w, project, http.StatusOK)
+	web.Respond(w, r, project, http.StatusOK)
 }
 
 func isRequestValid(m *domain.Project) (bool, error) {
@@ -168,22 +168,22 @@ func isRequestValid(m *domain.Project) (bool, error) {
 func (p *projectHandler) Store(w http.ResponseWriter, r *http.Request) {
 	var project domain.Project
 	if err := json.NewDecoder(r.Body).Decode(&project); err != nil {
-		web.RespondError(w, err, http.StatusUnprocessableEntity)
+		web.RespondError(w, r, err, http.StatusUnprocessableEntity)
 
 		return
 	}
 	if ok, err := isRequestValid(&project); !ok {
-		web.RespondError(w, err, http.StatusBadRequest)
+		web.RespondError(w, r, err, http.StatusBadRequest)
 
 		return
 	}
 	if err := p.projectUsecase.Store(r.Context(), &project); err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}
 
-	web.Respond(w, project, http.StatusOK)
+	web.Respond(w, r, project, http.StatusOK)
 }
 
 // Delete godoc
@@ -201,12 +201,12 @@ func (p *projectHandler) Store(w http.ResponseWriter, r *http.Request) {
 func (p *projectHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "projectID"))
 	if err != nil {
-		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+		web.RespondError(w, r, domain.ErrNotFound, http.StatusNotFound)
 
 		return
 	}
 	if err := p.projectUsecase.Delete(r.Context(), id); err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}

@@ -48,11 +48,11 @@ func New(us domain.ColumnUsecase) chi.Router {
 func (c *columnHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 	columns, err := c.columnUsecase.Fetch(r.Context())
 	if err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}
-	web.Respond(w, columns, http.StatusOK)
+	web.Respond(w, r, columns, http.StatusOK)
 }
 
 // FetchTasks godoc
@@ -70,17 +70,17 @@ func (c *columnHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 func (c *columnHandler) FetchTasks(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "columnID"))
 	if err != nil {
-		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+		web.RespondError(w, r, domain.ErrNotFound, http.StatusNotFound)
 
 		return
 	}
 	tasks, err := c.columnUsecase.FetchTasks(r.Context(), id)
 	if err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}
-	web.Respond(w, tasks, http.StatusOK)
+	web.Respond(w, r, tasks, http.StatusOK)
 }
 
 // GetByID godoc
@@ -98,17 +98,17 @@ func (c *columnHandler) FetchTasks(w http.ResponseWriter, r *http.Request) {
 func (c *columnHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "columnID"))
 	if err != nil {
-		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+		web.RespondError(w, r, domain.ErrNotFound, http.StatusNotFound)
 
 		return
 	}
 	column, err := c.columnUsecase.GetByID(r.Context(), id)
 	if err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}
-	web.Respond(w, column, http.StatusOK)
+	web.Respond(w, r, column, http.StatusOK)
 }
 
 func isRequestValid(m *domain.Column) (bool, error) {
@@ -139,21 +139,21 @@ func isRequestValid(m *domain.Column) (bool, error) {
 func (c *columnHandler) Store(w http.ResponseWriter, r *http.Request) {
 	var column domain.Column
 	if err := json.NewDecoder(r.Body).Decode(&column); err != nil {
-		web.RespondError(w, err, http.StatusUnprocessableEntity)
+		web.RespondError(w, r, err, http.StatusUnprocessableEntity)
 
 		return
 	}
 	if ok, err := isRequestValid(&column); !ok {
-		web.RespondError(w, err, http.StatusBadRequest)
+		web.RespondError(w, r, err, http.StatusBadRequest)
 
 		return
 	}
 	if err := c.columnUsecase.Store(r.Context(), &column); err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}
-	web.Respond(w, column, http.StatusOK)
+	web.Respond(w, r, column, http.StatusOK)
 }
 
 // Delete godoc
@@ -171,12 +171,12 @@ func (c *columnHandler) Store(w http.ResponseWriter, r *http.Request) {
 func (c *columnHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "columnID"))
 	if err != nil {
-		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+		web.RespondError(w, r, domain.ErrNotFound, http.StatusNotFound)
 
 		return
 	}
 	if err := c.columnUsecase.Delete(r.Context(), id); err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}

@@ -47,11 +47,11 @@ func New(us domain.CommentUsecase) chi.Router {
 func (c *commentHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 	comments, err := c.commentUsecase.Fetch(r.Context())
 	if err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}
-	web.Respond(w, comments, http.StatusOK)
+	web.Respond(w, r, comments, http.StatusOK)
 }
 
 // GetByID godoc
@@ -69,17 +69,17 @@ func (c *commentHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 func (c *commentHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "commentID"))
 	if err != nil {
-		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+		web.RespondError(w, r, domain.ErrNotFound, http.StatusNotFound)
 
 		return
 	}
 	comment, err := c.commentUsecase.GetByID(r.Context(), id)
 	if err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}
-	web.Respond(w, comment, http.StatusOK)
+	web.Respond(w, r, comment, http.StatusOK)
 }
 
 func isRequestValid(m *domain.Comment) (bool, error) {
@@ -110,21 +110,21 @@ func isRequestValid(m *domain.Comment) (bool, error) {
 func (c *commentHandler) Store(w http.ResponseWriter, r *http.Request) {
 	var comment domain.Comment
 	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
-		web.RespondError(w, err, http.StatusUnprocessableEntity)
+		web.RespondError(w, r, err, http.StatusUnprocessableEntity)
 
 		return
 	}
 	if ok, err := isRequestValid(&comment); !ok {
-		web.RespondError(w, err, http.StatusBadRequest)
+		web.RespondError(w, r, err, http.StatusBadRequest)
 
 		return
 	}
 	if err := c.commentUsecase.Store(r.Context(), &comment); err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}
-	web.Respond(w, comment, http.StatusOK)
+	web.Respond(w, r, comment, http.StatusOK)
 }
 
 // Delete godoc
@@ -142,12 +142,12 @@ func (c *commentHandler) Store(w http.ResponseWriter, r *http.Request) {
 func (c *commentHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "commentID"))
 	if err != nil {
-		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+		web.RespondError(w, r, domain.ErrNotFound, http.StatusNotFound)
 
 		return
 	}
 	if err := c.commentUsecase.Delete(r.Context(), id); err != nil {
-		web.RespondError(w, err, getStatusCode(err))
+		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
 	}

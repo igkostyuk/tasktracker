@@ -23,6 +23,7 @@ type LogFormatter interface {
 // LogEntry records the final log when a request completes.
 type LogEntry interface {
 	Write(status int, header http.Header, elapsed time.Duration, extra interface{})
+	WriteError(err error)
 	Panic(v interface{}, stack []byte)
 }
 
