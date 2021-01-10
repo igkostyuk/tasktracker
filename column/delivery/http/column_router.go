@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-playground/validator"
+	"github.com/google/uuid"
 	"github.com/igkostyuk/tasktracker/domain"
 	"github.com/igkostyuk/tasktracker/internal/web"
 )
@@ -67,7 +68,12 @@ func (c *columnHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 // @Router /columns/{id}/tasks [get]
 // FetchTasks will fetch tasks by column id.
 func (c *columnHandler) FetchTasks(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "columnID")
+	id, err := uuid.Parse(chi.URLParam(r, "columnID"))
+	if err != nil {
+		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+
+		return
+	}
 	tasks, err := c.columnUsecase.FetchTasks(r.Context(), id)
 	if err != nil {
 		web.RespondError(w, err, getStatusCode(err))
@@ -90,7 +96,12 @@ func (c *columnHandler) FetchTasks(w http.ResponseWriter, r *http.Request) {
 // @Router /columns/{id} [get]
 // GetByID will get column by given id.
 func (c *columnHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "columnID")
+	id, err := uuid.Parse(chi.URLParam(r, "columnID"))
+	if err != nil {
+		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+
+		return
+	}
 	column, err := c.columnUsecase.GetByID(r.Context(), id)
 	if err != nil {
 		web.RespondError(w, err, getStatusCode(err))
@@ -158,7 +169,12 @@ func (c *columnHandler) Store(w http.ResponseWriter, r *http.Request) {
 // @Router /columns/{id} [delete]
 // Delete will delete column by given param.
 func (c *columnHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "columnID")
+	id, err := uuid.Parse(chi.URLParam(r, "columnID"))
+	if err != nil {
+		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+
+		return
+	}
 	if err := c.columnUsecase.Delete(r.Context(), id); err != nil {
 		web.RespondError(w, err, getStatusCode(err))
 

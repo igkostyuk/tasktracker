@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/igkostyuk/tasktracker/domain"
 )
 
@@ -21,7 +22,7 @@ func (c *columnUsecase) Fetch(ctx context.Context) ([]domain.Column, error) {
 	return c.columnRepo.Fetch(ctx)
 }
 
-func (c *columnUsecase) FetchTasks(ctx context.Context, id string) ([]domain.Task, error) {
+func (c *columnUsecase) FetchTasks(ctx context.Context, id uuid.UUID) ([]domain.Task, error) {
 	if _, err := c.columnRepo.GetByID(ctx, id); err != nil {
 		return nil, fmt.Errorf("fetch tasks by column id: %w", err)
 	}
@@ -29,11 +30,11 @@ func (c *columnUsecase) FetchTasks(ctx context.Context, id string) ([]domain.Tas
 	return c.taskRepo.FetchByColumnID(ctx, id)
 }
 
-func (c *columnUsecase) FetchByProjectID(ctx context.Context, id string) ([]domain.Column, error) {
+func (c *columnUsecase) FetchByProjectID(ctx context.Context, id uuid.UUID) ([]domain.Column, error) {
 	return c.columnRepo.FetchByProjectID(ctx, id)
 }
 
-func (c *columnUsecase) GetByID(ctx context.Context, id string) (domain.Column, error) {
+func (c *columnUsecase) GetByID(ctx context.Context, id uuid.UUID) (domain.Column, error) {
 	return c.columnRepo.GetByID(ctx, id)
 }
 
@@ -65,7 +66,7 @@ func (c *columnUsecase) Store(ctx context.Context, cm *domain.Column) error {
 	return c.columnRepo.Store(ctx, cm)
 }
 
-func (c *columnUsecase) Delete(ctx context.Context, id string) error {
+func (c *columnUsecase) Delete(ctx context.Context, id uuid.UUID) error {
 	column, err := c.columnRepo.GetByID(ctx, id)
 	if err != nil {
 		return fmt.Errorf("get column by id: %w", err)

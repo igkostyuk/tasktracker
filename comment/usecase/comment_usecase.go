@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/igkostyuk/tasktracker/domain"
 )
 
@@ -20,11 +21,11 @@ func (c *commentUsecase) Fetch(ctx context.Context) ([]domain.Comment, error) {
 	return c.commentRepo.Fetch(ctx)
 }
 
-func (c *commentUsecase) FetchByTaskID(ctx context.Context, id string) ([]domain.Comment, error) {
+func (c *commentUsecase) FetchByTaskID(ctx context.Context, id uuid.UUID) ([]domain.Comment, error) {
 	return c.commentRepo.FetchByTaskID(ctx, id)
 }
 
-func (c *commentUsecase) GetByID(ctx context.Context, id string) (domain.Comment, error) {
+func (c *commentUsecase) GetByID(ctx context.Context, id uuid.UUID) (domain.Comment, error) {
 	return c.commentRepo.GetByID(ctx, id)
 }
 
@@ -36,7 +37,7 @@ func (c *commentUsecase) Store(ctx context.Context, ct *domain.Comment) error {
 	return c.commentRepo.Store(ctx, ct)
 }
 
-func (c *commentUsecase) Delete(ctx context.Context, id string) error {
+func (c *commentUsecase) Delete(ctx context.Context, id uuid.UUID) error {
 	if _, err := c.commentRepo.GetByID(ctx, id); err != nil {
 		return fmt.Errorf("delete comment: %w", err)
 	}

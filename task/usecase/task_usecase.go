@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/igkostyuk/tasktracker/domain"
 )
 
@@ -21,7 +22,7 @@ func (t *taskUsecase) Fetch(ctx context.Context) ([]domain.Task, error) {
 	return t.taskRepo.Fetch(ctx)
 }
 
-func (t *taskUsecase) FetchComments(ctx context.Context, id string) ([]domain.Comment, error) {
+func (t *taskUsecase) FetchComments(ctx context.Context, id uuid.UUID) ([]domain.Comment, error) {
 	if _, err := t.taskRepo.GetByID(ctx, id); err != nil {
 		return nil, fmt.Errorf("fetch comments by task id: %w", err)
 	}
@@ -29,15 +30,15 @@ func (t *taskUsecase) FetchComments(ctx context.Context, id string) ([]domain.Co
 	return t.commentRepo.FetchByTaskID(ctx, id)
 }
 
-func (t *taskUsecase) FetchByProjectID(ctx context.Context, id string) ([]domain.Task, error) {
+func (t *taskUsecase) FetchByProjectID(ctx context.Context, id uuid.UUID) ([]domain.Task, error) {
 	return t.taskRepo.FetchByProjectID(ctx, id)
 }
 
-func (t *taskUsecase) FetchByColumnID(ctx context.Context, id string) ([]domain.Task, error) {
+func (t *taskUsecase) FetchByColumnID(ctx context.Context, id uuid.UUID) ([]domain.Task, error) {
 	return t.taskRepo.FetchByProjectID(ctx, id)
 }
 
-func (t *taskUsecase) GetByID(ctx context.Context, id string) (domain.Task, error) {
+func (t *taskUsecase) GetByID(ctx context.Context, id uuid.UUID) (domain.Task, error) {
 	return t.taskRepo.GetByID(ctx, id)
 }
 
@@ -49,7 +50,7 @@ func (t *taskUsecase) Store(ctx context.Context, m *domain.Task) error {
 	return t.taskRepo.Store(ctx, m)
 }
 
-func (t *taskUsecase) Delete(ctx context.Context, id string) error {
+func (t *taskUsecase) Delete(ctx context.Context, id uuid.UUID) error {
 	if _, err := t.taskRepo.GetByID(ctx, id); err != nil {
 		return fmt.Errorf("delete task: %w", err)
 	}

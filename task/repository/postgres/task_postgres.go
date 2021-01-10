@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/igkostyuk/tasktracker/domain"
 )
 
@@ -53,13 +54,13 @@ func (t *taskRepository) Fetch(ctx context.Context) ([]domain.Task, error) {
 	return t.fetch(ctx, query)
 }
 
-func (t *taskRepository) FetchByColumnID(ctx context.Context, id string) ([]domain.Task, error) {
+func (t *taskRepository) FetchByColumnID(ctx context.Context, id uuid.UUID) ([]domain.Task, error) {
 	query := `SELECT id, position, name, description, colum_id FROM tasks WHERE colum_id = $1`
 
 	return t.fetch(ctx, query, id)
 }
 
-func (t *taskRepository) FetchByProjectID(ctx context.Context, id string) ([]domain.Task, error) {
+func (t *taskRepository) FetchByProjectID(ctx context.Context, id uuid.UUID) ([]domain.Task, error) {
 	query := `SELECT id, position, name, description, colum_id FROM tasks WHERE colum_id IN 
 	(SELECT id FROM columns WHERE project_id = $1)`
 
@@ -86,7 +87,7 @@ func (t *taskRepository) getOne(ctx context.Context, query string, args ...inter
 	return res, nil
 }
 
-func (t *taskRepository) GetByID(ctx context.Context, id string) (domain.Task, error) {
+func (t *taskRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.Task, error) {
 	query := `SELECT id, position, name, description, colum_id FROM tasks WHERE id = $1`
 
 	return t.getOne(ctx, query, id)
@@ -113,7 +114,7 @@ func (t *taskRepository) Store(ctx context.Context, ts *domain.Task) error {
 	return nil
 }
 
-func (t *taskRepository) Delete(ctx context.Context, id string) error {
+func (t *taskRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	query := `DELETE FROM tasks WHERE id = $1`
 	_, err := t.db.ExecContext(ctx, query, id)
 	if err != nil {

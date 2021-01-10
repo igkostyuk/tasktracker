@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-playground/validator"
+	"github.com/google/uuid"
 	"github.com/igkostyuk/tasktracker/domain"
 	"github.com/igkostyuk/tasktracker/internal/web"
 )
@@ -66,7 +67,12 @@ func (c *commentHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 // @Router /comments/{id} [get]
 // GetByID will get comment by given id.
 func (c *commentHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "commentID")
+	id, err := uuid.Parse(chi.URLParam(r, "commentID"))
+	if err != nil {
+		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+
+		return
+	}
 	comment, err := c.commentUsecase.GetByID(r.Context(), id)
 	if err != nil {
 		web.RespondError(w, err, getStatusCode(err))
@@ -134,7 +140,12 @@ func (c *commentHandler) Store(w http.ResponseWriter, r *http.Request) {
 // @Router /comments/{id} [delete]
 // Delete will delete comment by given param.
 func (c *commentHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "commentID")
+	id, err := uuid.Parse(chi.URLParam(r, "commentID"))
+	if err != nil {
+		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+
+		return
+	}
 	if err := c.commentUsecase.Delete(r.Context(), id); err != nil {
 		web.RespondError(w, err, getStatusCode(err))
 

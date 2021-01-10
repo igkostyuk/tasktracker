@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/igkostyuk/tasktracker/domain"
 )
 
@@ -51,7 +52,7 @@ func (c *commentRepository) Fetch(ctx context.Context) ([]domain.Comment, error)
 	return c.fetch(ctx, query)
 }
 
-func (c *commentRepository) FetchByTaskID(ctx context.Context, id string) ([]domain.Comment, error) {
+func (c *commentRepository) FetchByTaskID(ctx context.Context, id uuid.UUID) ([]domain.Comment, error) {
 	query := `SELECT id, text, task_id FROM comments WHERE task_id = $1`
 
 	return c.fetch(ctx, query, id)
@@ -75,7 +76,7 @@ func (c *commentRepository) getOne(ctx context.Context, query string, args ...in
 	return res, nil
 }
 
-func (c *commentRepository) GetByID(ctx context.Context, id string) (domain.Comment, error) {
+func (c *commentRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.Comment, error) {
 	query := `SELECT id, position, name, description, column_id FROM comments WHERE id = $1`
 
 	return c.getOne(ctx, query, id)
@@ -102,7 +103,7 @@ func (c *commentRepository) Store(ctx context.Context, ct *domain.Comment) error
 	return nil
 }
 
-func (c *commentRepository) Delete(ctx context.Context, id string) error {
+func (c *commentRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	query := `DELETE FROM comments WHERE id = $1`
 	_, err := c.db.ExecContext(ctx, query, id)
 	if err != nil {

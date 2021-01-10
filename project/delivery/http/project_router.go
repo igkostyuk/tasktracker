@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-playground/validator"
+	"github.com/google/uuid"
 	"github.com/igkostyuk/tasktracker/domain"
 	"github.com/igkostyuk/tasktracker/internal/web"
 )
@@ -68,7 +69,12 @@ func (p *projectHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 // @Router /projects/{id}/columns [get]
 // FetchColumns will fetch columns by project id.
 func (p *projectHandler) FetchColumns(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "projectID")
+	id, err := uuid.Parse(chi.URLParam(r, "projectID"))
+	if err != nil {
+		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+
+		return
+	}
 	columns, err := p.projectUsecase.FetchColumns(r.Context(), id)
 	if err != nil {
 		web.RespondError(w, err, getStatusCode(err))
@@ -91,7 +97,12 @@ func (p *projectHandler) FetchColumns(w http.ResponseWriter, r *http.Request) {
 // @Router /projects/{id}/tasks [get]
 // FetchTasks will fetch tasks by project id.
 func (p *projectHandler) FetchTasks(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "projectID")
+	id, err := uuid.Parse(chi.URLParam(r, "projectID"))
+	if err != nil {
+		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+
+		return
+	}
 	tasks, err := p.projectUsecase.FetchTasks(r.Context(), id)
 	if err != nil {
 		web.RespondError(w, err, getStatusCode(err))
@@ -114,7 +125,12 @@ func (p *projectHandler) FetchTasks(w http.ResponseWriter, r *http.Request) {
 // @Router /projects/{id} [get]
 // GetByID will get project by given id.
 func (p *projectHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "projectID")
+	id, err := uuid.Parse(chi.URLParam(r, "projectID"))
+	if err != nil {
+		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+
+		return
+	}
 	project, err := p.projectUsecase.GetByID(r.Context(), id)
 	if err != nil {
 		web.RespondError(w, err, getStatusCode(err))
@@ -183,7 +199,12 @@ func (p *projectHandler) Store(w http.ResponseWriter, r *http.Request) {
 // @Router /projects/{id} [delete]
 // Delete will delete project by given param.
 func (p *projectHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "projectID")
+	id, err := uuid.Parse(chi.URLParam(r, "projectID"))
+	if err != nil {
+		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+
+		return
+	}
 	if err := p.projectUsecase.Delete(r.Context(), id); err != nil {
 		web.RespondError(w, err, getStatusCode(err))
 

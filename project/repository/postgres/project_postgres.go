@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/igkostyuk/tasktracker/domain"
 )
 
@@ -60,7 +61,7 @@ func (p *projectRepository) getOne(ctx context.Context, query string, args ...in
 	return res, nil
 }
 
-func (p *projectRepository) GetByID(ctx context.Context, id string) (domain.Project, error) {
+func (p *projectRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.Project, error) {
 	query := `SELECT id,name,description FROM projects WHERE id = $1`
 
 	return p.getOne(ctx, query, id)
@@ -87,7 +88,7 @@ func (p *projectRepository) Store(ctx context.Context, a *domain.Project) error 
 	return nil
 }
 
-func (p *projectRepository) Delete(ctx context.Context, id string) error {
+func (p *projectRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	query := `DELETE FROM projects WHERE id = $1`
 	_, err := p.db.ExecContext(ctx, query, id)
 	if err != nil {

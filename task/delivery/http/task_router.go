@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-playground/validator"
+	"github.com/google/uuid"
 	"github.com/igkostyuk/tasktracker/domain"
 	"github.com/igkostyuk/tasktracker/internal/web"
 )
@@ -67,7 +68,12 @@ func (t *taskHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 // @Router /tasks/{id}/comments [get]
 // FetchComments will fetch tasks by task id.
 func (t *taskHandler) FetchComments(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "taskID")
+	id, err := uuid.Parse(chi.URLParam(r, "taskID"))
+	if err != nil {
+		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+
+		return
+	}
 	comments, err := t.taskUsecase.FetchComments(r.Context(), id)
 	if err != nil {
 		web.RespondError(w, err, getStatusCode(err))
@@ -90,7 +96,12 @@ func (t *taskHandler) FetchComments(w http.ResponseWriter, r *http.Request) {
 // @Router /tasks/{id} [get]
 // GetByID will get task by given id.
 func (t *taskHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "taskID")
+	id, err := uuid.Parse(chi.URLParam(r, "taskID"))
+	if err != nil {
+		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+
+		return
+	}
 	task, err := t.taskUsecase.GetByID(r.Context(), id)
 	if err != nil {
 		web.RespondError(w, err, getStatusCode(err))
@@ -158,7 +169,12 @@ func (t *taskHandler) Store(w http.ResponseWriter, r *http.Request) {
 // @Router /tasks/{id} [delete]
 // Delete will delete task by given param.
 func (t *taskHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "taskID")
+	id, err := uuid.Parse(chi.URLParam(r, "taskID"))
+	if err != nil {
+		web.RespondError(w, domain.ErrNotFound, http.StatusNotFound)
+
+		return
+	}
 	if err := t.taskUsecase.Delete(r.Context(), id); err != nil {
 		web.RespondError(w, err, getStatusCode(err))
 

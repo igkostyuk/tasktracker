@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/igkostyuk/tasktracker/domain"
 )
 
@@ -53,7 +54,7 @@ func (c *columnRepository) Fetch(ctx context.Context) ([]domain.Column, error) {
 	return c.fetch(ctx, query)
 }
 
-func (c *columnRepository) FetchByProjectID(ctx context.Context, id string) ([]domain.Column, error) {
+func (c *columnRepository) FetchByProjectID(ctx context.Context, id uuid.UUID) ([]domain.Column, error) {
 	query := `SELECT id,position,name,status,project_id FROM columns WHERE project_id = $1`
 
 	return c.fetch(ctx, query, id)
@@ -79,7 +80,7 @@ func (c *columnRepository) getOne(ctx context.Context, query string, args ...int
 	return res, nil
 }
 
-func (c *columnRepository) GetByID(ctx context.Context, id string) (domain.Column, error) {
+func (c *columnRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.Column, error) {
 	query := `SELECT id,position,name,status,project_id FROM columns WHERE id = $1`
 
 	return c.getOne(ctx, query, id)
@@ -106,7 +107,7 @@ func (c *columnRepository) Store(ctx context.Context, a *domain.Column) error {
 	return nil
 }
 
-func (c *columnRepository) Delete(ctx context.Context, id string) error {
+func (c *columnRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	query := `DELETE FROM columns WHERE id = $1`
 	_, err := c.db.ExecContext(ctx, query, id)
 	if err != nil {
