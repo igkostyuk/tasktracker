@@ -159,8 +159,6 @@ func isRequestValid(m *domain.Project) (bool, error) {
 // @Param project body domain.Project true "Add project"
 // @Success 200 {object} domain.Project
 // @Failure 400 {object} web.HTTPError
-// @Failure 404 {object} web.HTTPError
-// @Failure 409 {object} web.HTTPError
 // @Failure 422 {object} web.HTTPError
 // @Failure 500 {object} web.HTTPError
 // @Router /projects [post]
@@ -214,10 +212,6 @@ func (p *projectHandler) Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func getStatusCode(err error) int {
-	if err == nil {
-		return http.StatusOK
-	}
-
 	switch {
 	case errors.Is(err, domain.ErrNotFound):
 		return http.StatusNotFound
