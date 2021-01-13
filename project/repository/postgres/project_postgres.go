@@ -68,7 +68,7 @@ func (p *projectRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.P
 }
 
 func (p *projectRepository) Update(ctx context.Context, pr *domain.Project) error {
-	query := `UPDATE projects SET name=$2,description=$3 FROM projects WHERE id = $1`
+	query := `UPDATE projects SET name = $2,description = $3 FROM projects WHERE id = $1`
 	_, err := p.db.ExecContext(ctx, query, pr.ID, pr.Name, pr.Description)
 	if err != nil {
 		return fmt.Errorf("update error: %w", err)
@@ -78,7 +78,7 @@ func (p *projectRepository) Update(ctx context.Context, pr *domain.Project) erro
 }
 
 func (p *projectRepository) Store(ctx context.Context, a *domain.Project) error {
-	query := `INSERT INTO projects (name, description) VALUES ( $1, $2) RETURNING id`
+	query := `INSERT INTO projects ( name, description) VALUES ($1, $2) RETURNING id`
 	row := p.db.QueryRowContext(ctx, query, a.Name, a.Description)
 	err := row.Scan(&a.ID)
 	if err != nil {
