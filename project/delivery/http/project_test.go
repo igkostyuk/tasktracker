@@ -346,6 +346,7 @@ func TestStore(t *testing.T) {
 	is.Equal(len(mockedProjectUsecase.StoreCalls()), 1)
 }
 
+//nolint:funlen
 func TestStoreErrors(t *testing.T) {
 	tt := []struct {
 		name      string
@@ -355,10 +356,11 @@ func TestStoreErrors(t *testing.T) {
 		mockError error
 	}{
 		{
-			name:      "400",
-			project:   `{"name":"testName"}`,
-			code:      http.StatusBadRequest,
-			message:   "validation: Key: 'Project.Description' Error:Field validation for 'Description' failed on the 'required' tag",
+			name:    "400",
+			project: `{"name":"testName"}`,
+			code:    http.StatusBadRequest,
+			message: "validation: Key: 'Project.Description'" +
+				" Error:Field validation for 'Description' failed on the 'required' tag",
 			mockError: nil,
 		},
 		{

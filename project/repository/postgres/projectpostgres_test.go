@@ -46,6 +46,7 @@ func TestFetch(t *testing.T) {
 
 func TestGetByID(t *testing.T) {
 	is := helper.New(t)
+	// nolint:exhaustivestruct
 	mockProject := domain.Project{Name: "TestName1", Description: "testDescription1"}
 
 	rows := sqlmock.NewRows([]string{"id", "name", "description"}).
@@ -69,10 +70,11 @@ func TestGetByID(t *testing.T) {
 		_, err = projectRepository.New(db).GetByID(context.TODO(), id)
 		is.True(err != nil)
 	})
-
 }
+
 func TestUpdate(t *testing.T) {
 	is := helper.New(t)
+	// nolint:exhaustivestruct
 	pr := &domain.Project{Name: "TestName1", Description: "testDescription1"}
 
 	query := `UPDATE projects SET name = $2,description = $3 FROM projects WHERE id = $1`
@@ -80,7 +82,8 @@ func TestUpdate(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		db, mock, err := sqlmock.New()
 		is.NoErr(err)
-		mock.ExpectExec(regexp.QuoteMeta(query)).WithArgs(pr.ID, pr.Name, pr.Description).WillReturnResult(sqlmock.NewResult(1, 1))
+		mock.ExpectExec(regexp.QuoteMeta(query)).WithArgs(pr.ID, pr.Name, pr.Description).
+			WillReturnResult(sqlmock.NewResult(1, 1))
 
 		err = projectRepository.New(db).Update(context.TODO(), pr)
 		is.NoErr(err)
@@ -97,7 +100,7 @@ func TestUpdate(t *testing.T) {
 
 func TestStore(t *testing.T) {
 	is := helper.New(t)
-
+	// nolint:exhaustivestruct
 	pr := &domain.Project{Name: "TestName1", Description: "testDescription1"}
 	query := `INSERT INTO projects ( name, description) VALUES ($1, $2) RETURNING id`
 	id := uuid.New()
@@ -105,7 +108,9 @@ func TestStore(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		db, mock, err := sqlmock.New()
 		is.NoErr(err)
-		mock.ExpectQuery(regexp.QuoteMeta(query)).WithArgs(pr.Name, pr.Description).WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(id))
+		mock.ExpectQuery(regexp.QuoteMeta(query)).
+			WithArgs(pr.Name, pr.Description).
+			WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(id))
 
 		err = projectRepository.New(db).Store(context.TODO(), pr)
 		is.NoErr(err)
