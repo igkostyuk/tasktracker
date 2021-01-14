@@ -14,7 +14,7 @@ type Column struct {
 	Position  int64     `json:"position"`
 	Name      string    `json:"name" validate:"required,min=1,max=255"`
 	Status    string    `json:"status" validate:"required,min=1,max=255"`
-	ProjectID uuid.UUID `json:"project_id" validate:"required,uuid4"`
+	ProjectID uuid.UUID `json:"project_id" validate:"required"`
 }
 
 // ColumnUsecase represent the column's usecases.

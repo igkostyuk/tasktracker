@@ -14,7 +14,7 @@ type Task struct {
 	Position    int64     `json:"position"`
 	Name        string    `json:"name" validate:"required,min=1,max=500"`
 	Description string    `json:"description" validate:"required,min=0,max=5000"`
-	ColumnID    uuid.UUID `json:"column_id" validate:"required,uuid4"`
+	ColumnID    uuid.UUID `json:"column_id" validate:"required"`
 }
 
 // TaskUsecase represent the task's usecases.

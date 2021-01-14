@@ -12,7 +12,7 @@ import (
 type Comment struct {
 	ID     uuid.UUID `json:"id" readonly:"true"`
 	Text   string    `json:"text" validate:"required,min=1,max=5000"`
-	TaskID uuid.UUID `json:"task_id" validate:"required,uuid4"`
+	TaskID uuid.UUID `json:"task_id" validate:"required"`
 }
 
 // CommentUsecase represent the comment's usecases.
