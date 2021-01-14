@@ -3,6 +3,7 @@ module github.com/igkostyuk/tasktracker
 go 1.15
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/Yalantis/go-config v1.0.0
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/go-chi/chi v4.0.2+incompatible
@@ -14,6 +15,7 @@ require (
 	github.com/jackc/pgx/v4 v4.10.1
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lib/pq v1.9.0 // indirect
+	github.com/matryer/is v1.4.0
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rs/cors v1.7.0
 	github.com/shopspring/decimal v1.2.0 // indirect

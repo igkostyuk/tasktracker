@@ -44,6 +44,8 @@ run:
     - vendor
 
 issues:
+  exclude:
+     - Using the variable on range scope `tc` in function literal
   exclude-rules:
     - text: "weak cryptographic primitive"
       linters:
