@@ -26,7 +26,7 @@ func developmentConfig() zap.Config {
 		EncoderConfig:     zap.NewDevelopmentEncoderConfig(),
 		OutputPaths:       []string{"stdout"},
 		ErrorOutputPaths:  []string{"stderr"},
-		DisableStacktrace: false,
+		DisableStacktrace: true,
 	}
 }
 
