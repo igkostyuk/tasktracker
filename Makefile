@@ -27,7 +27,7 @@ test:
 # ==============================================================================
 # Running from within docker compose
 
-run: up 
+run: up migrate-up
 
 up:
 	docker-compose -f deployments/compose/compose.yaml  up --detach --remove-orphans
