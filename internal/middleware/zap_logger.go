@@ -43,7 +43,7 @@ func (l *zapStructuredLoggerEntry) Write(status int, header http.Header, elapsed
 func (l *zapStructuredLoggerEntry) WriteError(err error) {
 	fields := append(
 		l.fields,
-		zap.String("err", err.Error()),
+		zap.Error(err),
 	)
 
 	l.Logger.Error("error", fields...)

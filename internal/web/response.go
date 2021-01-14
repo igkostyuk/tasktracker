@@ -22,8 +22,9 @@ func Respond(w http.ResponseWriter, r *http.Request, data interface{}, statusCod
 	// Write the status code to the response.
 	w.WriteHeader(statusCode)
 	// Send the result back to the client.
-	_, err = w.Write(jsonData)
-	logError(r, err)
+	if _, err = w.Write(jsonData); err != nil {
+		logError(r, err)
+	}
 }
 
 // RespondError sent error JSON message to the client.
