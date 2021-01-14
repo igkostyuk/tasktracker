@@ -127,7 +127,7 @@ func isRequestValid(m *domain.Column) (bool, error) {
 // @Tags columns
 // @Accept  json
 // @Produce  json
-// @Param project body domain.Column true "Add column"
+// @Param column body domain.Column true "Add column"
 // @Success 200 {object} domain.Column
 // @Failure 400 {object} web.HTTPError
 // @Failure 404 {object} web.HTTPError
