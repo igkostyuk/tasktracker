@@ -27,6 +27,7 @@ func New(us domain.ProjectUsecase) chi.Router {
 	r.Post("/", handler.Store)
 	r.Route("/{projectID}", func(r chi.Router) {
 		r.Get("/", handler.GetByID)
+		r.Put("/", handler.Update)
 		r.Delete("/", handler.Delete)
 		r.Get("/columns", handler.FetchColumns)
 		r.Get("/tasks", handler.FetchTasks)
@@ -176,6 +177,48 @@ func (p *projectHandler) Store(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := p.projectUsecase.Store(r.Context(), &project); err != nil {
+		web.RespondError(w, r, err, getStatusCode(err))
+
+		return
+	}
+
+	web.Respond(w, r, project, http.StatusOK)
+}
+
+// Store godoc
+// @Summary Update a project
+// @Description update by json project
+// @Tags projects
+// @Accept  json
+// @Produce  json
+// @Param  id path string true "project ID"
+// @Param project body domain.Project true "Update project"
+// @Success 200 {object} domain.Project
+// @Failure 400 {object} web.HTTPError
+// @Failure 422 {object} web.HTTPError
+// @Failure 500 {object} web.HTTPError
+// @Router /projects/{id} [put]
+// Update will update the project by given request body.
+func (p *projectHandler) Update(w http.ResponseWriter, r *http.Request) {
+	id, err := uuid.Parse(chi.URLParam(r, "projectID"))
+	if err != nil {
+		web.RespondError(w, r, domain.ErrNotFound, http.StatusNotFound)
+
+		return
+	}
+	var project domain.Project
+	project.ID = id
+	if err := json.NewDecoder(r.Body).Decode(&project); err != nil {
+		web.RespondError(w, r, err, http.StatusUnprocessableEntity)
+
+		return
+	}
+	if ok, err := isRequestValid(&project); !ok {
+		web.RespondError(w, r, err, http.StatusBadRequest)
+
+		return
+	}
+	if err := p.projectUsecase.Update(r.Context(), &project); err != nil {
 		web.RespondError(w, r, err, getStatusCode(err))
 
 		return

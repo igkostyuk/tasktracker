@@ -25,7 +25,7 @@ func TestFetch(t *testing.T) {
 		AddRow(mockProjects[0].ID, mockProjects[0].Name, mockProjects[0].Description).
 		AddRow(mockProjects[1].ID, mockProjects[1].Name, mockProjects[1].Description)
 
-	query := `SELECT id,name,description FROM projects`
+	query := `SELECT id,name,description FROM projects ORDER BY name`
 
 	t.Run("success", func(t *testing.T) {
 		db, mock, err := sqlmock.New()
@@ -77,7 +77,7 @@ func TestUpdate(t *testing.T) {
 	// nolint:exhaustivestruct
 	pr := &domain.Project{Name: "TestName1", Description: "testDescription1"}
 
-	query := `UPDATE projects SET name = $2,description = $3 FROM projects WHERE id = $1`
+	query := `UPDATE projects SET name = $2,description = $3 WHERE id = $1`
 
 	t.Run("success", func(t *testing.T) {
 		db, mock, err := sqlmock.New()

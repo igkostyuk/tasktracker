@@ -20,7 +20,7 @@ func New(db *sql.DB) domain.ProjectRepository {
 }
 
 func (p *projectRepository) Fetch(ctx context.Context) ([]domain.Project, error) {
-	query := `SELECT id,name,description FROM projects`
+	query := `SELECT id,name,description FROM projects ORDER BY name`
 	rows, err := p.db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("query error: %w", err)
@@ -68,7 +68,7 @@ func (p *projectRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.P
 }
 
 func (p *projectRepository) Update(ctx context.Context, pr *domain.Project) error {
-	query := `UPDATE projects SET name = $2,description = $3 FROM projects WHERE id = $1`
+	query := `UPDATE projects SET name = $2,description = $3 WHERE id = $1`
 	_, err := p.db.ExecContext(ctx, query, pr.ID, pr.Name, pr.Description)
 	if err != nil {
 		return fmt.Errorf("update error: %w", err)

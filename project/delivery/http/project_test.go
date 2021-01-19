@@ -387,9 +387,9 @@ func TestStoreErrors(t *testing.T) {
 		{
 			name:      "500",
 			project:   `{"name":"testName","description":"testDescription"}`,
-			code:      http.StatusNotFound,
-			message:   domain.ErrNotFound.Error(),
-			mockError: domain.ErrNotFound,
+			code:      http.StatusInternalServerError,
+			message:   domain.ErrInternalServerError.Error(),
+			mockError: domain.ErrInternalServerError,
 		},
 	}
 	for _, tc := range tt {
@@ -413,6 +413,126 @@ func TestStoreErrors(t *testing.T) {
 				return
 			}
 			is.Equal(len(mockedProjectUsecase.StoreCalls()), 0)
+		})
+	}
+}
+
+func TestUpdate(t *testing.T) {
+	is := helper.New(t)
+	// nolint:exhaustivestruct
+	want := domain.Project{Name: "testName", Description: "testDescription"}
+
+	// nolint:exhaustivestruct
+	mockedProjectUsecase := &mocks.ProjectUsecaseMock{
+		UpdateFunc: func(ctx context.Context, pr *domain.Project) error {
+			return nil
+		},
+	}
+	jsonData, err := json.Marshal(want)
+	is.NoErr(err)
+	path := fmt.Sprintf("/%s", validUUIDString)
+	request, err := http.NewRequestWithContext(context.Background(), http.MethodPut, path, bytes.NewBuffer(jsonData))
+	is.NoErr(err)
+	request.Header.Set("Content-Type", "application/json")
+	response := httptest.NewRecorder()
+
+	projectDelivery.New(mockedProjectUsecase).ServeHTTP(response, request)
+
+	is.Equal(response.Code, http.StatusOK)
+	var got domain.Project
+	err = json.NewDecoder(response.Body).Decode(&got)
+	is.NoErr(err)
+
+	is.Equal(want, got)
+	is.Equal(len(mockedProjectUsecase.UpdateCalls()), 1)
+}
+
+//nolint:funlen
+func TestUpdateErrors(t *testing.T) {
+	tt := []struct {
+		name      string
+		path      string
+		project   string
+		code      int
+		message   string
+		mockError error
+	}{
+		{
+			name:    "400",
+			path:    fmt.Sprintf("/%s", validUUIDString),
+			project: `{"name":"testName"}`,
+			code:    http.StatusBadRequest,
+			message: "validation: Key: 'Project.Description'" +
+				" Error:Field validation for 'Description' failed on the 'required' tag",
+			mockError: nil,
+		},
+		{
+			name:      "400",
+			path:      fmt.Sprintf("/%s", validUUIDString),
+			project:   `{"description":"testDescription"}`,
+			code:      http.StatusBadRequest,
+			message:   "validation: Key: 'Project.Name' Error:Field validation for 'Name' failed on the 'required' tag",
+			mockError: nil,
+		},
+		{
+			name:      "404",
+			path:      fmt.Sprintf("/%s", "invalidUUID"),
+			project:   `{"description":"testDescription"}`,
+			code:      http.StatusNotFound,
+			message:   domain.ErrNotFound.Error(),
+			mockError: nil,
+		},
+		{
+			name:      "409",
+			path:      fmt.Sprintf("/%s", validUUIDString),
+			project:   `{"name":"testName","description":"testDescription"}`,
+			code:      http.StatusConflict,
+			message:   domain.ErrConflict.Error(),
+			mockError: domain.ErrConflict,
+		},
+		{
+			name:      "422",
+			path:      fmt.Sprintf("/%s", validUUIDString),
+			project:   ``,
+			code:      http.StatusUnprocessableEntity,
+			message:   "EOF",
+			mockError: nil,
+		},
+		{
+			name:      "500",
+			path:      fmt.Sprintf("/%s", validUUIDString),
+			project:   `{"name":"testName","description":"testDescription"}`,
+			code:      http.StatusInternalServerError,
+			message:   domain.ErrInternalServerError.Error(),
+			mockError: domain.ErrInternalServerError,
+		},
+	}
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			is := helper.New(t)
+			// nolint:exhaustivestruct
+			mockedProjectUsecase := &mocks.ProjectUsecaseMock{
+				UpdateFunc: func(ctx context.Context, pr *domain.Project) error {
+					return tc.mockError
+				},
+			}
+
+			request, err := http.NewRequestWithContext(
+				context.Background(),
+				http.MethodPut,
+				tc.path,
+				strings.NewReader(tc.project),
+			)
+			is.NoErr(err)
+			request.Header.Set("Content-Type", "application/json")
+			checkError(t, mockedProjectUsecase, request, tc.code, tc.message)
+
+			if tc.mockError != nil {
+				is.Equal(len(mockedProjectUsecase.UpdateCalls()), 1)
+
+				return
+			}
+			is.Equal(len(mockedProjectUsecase.UpdateCalls()), 0)
 		})
 	}
 }

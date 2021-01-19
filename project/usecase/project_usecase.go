@@ -44,6 +44,10 @@ func (p *projectUsecase) GetByID(ctx context.Context, id uuid.UUID) (domain.Proj
 }
 
 func (p *projectUsecase) Update(ctx context.Context, pr *domain.Project) error {
+	if _, err := p.projectRepo.GetByID(ctx, pr.ID); err != nil {
+		return fmt.Errorf("update project : %w", err)
+	}
+
 	return p.projectRepo.Update(ctx, pr)
 }
 

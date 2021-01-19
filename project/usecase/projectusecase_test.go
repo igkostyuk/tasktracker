@@ -163,10 +163,13 @@ func TestGetByID(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	is := helper.New(t)
-	// nolint:exhaustivestruct
-	project := domain.Project{Name: "1", Description: "testDescription"}
+	id := uuid.New()
+	project := domain.Project{ID: id, Name: "1", Description: "testDescription"}
 	// nolint:exhaustivestruct
 	mp := &mocks.ProjectRepositoryMock{
+		GetByIDFunc: func(ctx context.Context, id uuid.UUID) (domain.Project, error) {
+			return domain.Project{}, nil
+		},
 		UpdateFunc: func(ctx context.Context, pr *domain.Project) error {
 			return nil
 		},
@@ -174,8 +177,34 @@ func TestUpdate(t *testing.T) {
 	u := projectUsecase.New(mp, &mocks.ColumnRepositoryMock{}, &mocks.TaskRepositoryMock{})
 	err := u.Update(context.TODO(), &project)
 	is.NoErr(err)
-	cp := mp.UpdateCalls()
-	is.Equal(len(cp), 1)
+	cg := mp.GetByIDCalls()
+	is.Equal(len(cg), 1)
+	is.Equal(cg[0].ID, id)
+	cu := mp.UpdateCalls()
+	is.Equal(len(cu), 1)
+}
+
+func TestUpdateError(t *testing.T) {
+	is := helper.New(t)
+	id := uuid.New()
+	project := domain.Project{ID: id, Name: "1", Description: "testDescription"}
+	// nolint:exhaustivestruct
+	mp := &mocks.ProjectRepositoryMock{
+		GetByIDFunc: func(ctx context.Context, id uuid.UUID) (domain.Project, error) {
+			return domain.Project{}, errors.New("some error")
+		},
+		UpdateFunc: func(ctx context.Context, pr *domain.Project) error {
+			return nil
+		},
+	}
+	u := projectUsecase.New(mp, &mocks.ColumnRepositoryMock{}, &mocks.TaskRepositoryMock{})
+	err := u.Update(context.TODO(), &project)
+	is.True(err != nil)
+	cg := mp.GetByIDCalls()
+	is.Equal(len(cg), 1)
+	is.Equal(cg[0].ID, id)
+	cu := mp.UpdateCalls()
+	is.Equal(len(cu), 0)
 }
 
 func TestStore(t *testing.T) {
