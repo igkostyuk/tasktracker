@@ -43,7 +43,7 @@ func (t *taskUsecase) GetByID(ctx context.Context, id uuid.UUID) (domain.Task, e
 }
 
 func (t *taskUsecase) Update(ctx context.Context, pr *domain.Task) error {
-	return t.taskRepo.Update(ctx, pr)
+	return t.taskRepo.Update(ctx, *pr)
 }
 
 func (t *taskUsecase) Store(ctx context.Context, m *domain.Task) error {

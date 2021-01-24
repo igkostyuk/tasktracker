@@ -10,12 +10,12 @@ definitions:
       position:
         type: integer
       project_id:
+        readOnly: true
         type: string
       status:
         type: string
     required:
     - name
-    - project_id
     - status
     type: object
   domain.Comment:
@@ -61,6 +61,7 @@ definitions:
     - column_id
     - description
     - name
+    - position
     type: object
   web.HTTPError:
     properties:
@@ -99,47 +100,6 @@ paths:
           schema:
             $ref: '#/definitions/web.HTTPError'
       summary: Get all columns
-      tags:
-      - columns
-    post:
-      consumes:
-      - application/json
-      description: add by json column
-      parameters:
-      - description: Add column
-        in: body
-        name: project
-        required: true
-        schema:
-          $ref: '#/definitions/domain.Column'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/domain.Column'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/web.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/web.HTTPError'
-        "409":
-          description: Conflict
-          schema:
-            $ref: '#/definitions/web.HTTPError'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/web.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/web.HTTPError'
-      summary: Add a column
       tags:
       - columns
   /columns/{id}:
@@ -200,6 +160,52 @@ paths:
           schema:
             $ref: '#/definitions/web.HTTPError'
       summary: Show a column
+      tags:
+      - columns
+    put:
+      consumes:
+      - application/json
+      description: update by json column
+      parameters:
+      - description: column ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update column
+        in: body
+        name: column
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Column'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Column'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Update a column
       tags:
       - columns
   /columns/{id}/tasks:
@@ -413,14 +419,6 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/web.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/web.HTTPError'
-        "409":
-          description: Conflict
-          schema:
-            $ref: '#/definitions/web.HTTPError'
         "422":
           description: Unprocessable Entity
           schema:
@@ -492,6 +490,44 @@ paths:
       summary: Show a project
       tags:
       - projects
+    put:
+      consumes:
+      - application/json
+      description: update by json project
+      parameters:
+      - description: project ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update project
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Project'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Project'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Update a project
+      tags:
+      - projects
   /projects/{id}/columns:
     get:
       description: get columns by project id
@@ -526,6 +562,53 @@ paths:
       summary: Get columns by project id
       tags:
       - projects
+    post:
+      consumes:
+      - application/json
+      description: add by json column
+      parameters:
+      - description: project ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Add column
+        in: body
+        name: column
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Column'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Column'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Add a column
+      tags:
+      - columns
   /projects/{id}/tasks:
     get:
       description: get tasks by project id

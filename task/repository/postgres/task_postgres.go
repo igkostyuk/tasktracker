@@ -93,11 +93,29 @@ func (t *taskRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.Task
 	return t.getOne(ctx, query, id)
 }
 
-func (t *taskRepository) Update(ctx context.Context, tk *domain.Task) error {
-	query := `UPDATE tasks SET position=$2, name=$3, description=$4, colum_id=$5 FROM tasks WHERE id = $1`
-	_, err := t.db.ExecContext(ctx, query, tk.ID, tk.Position, tk.Name, tk.Description, tk.ColumnID)
+func (t *taskRepository) Update(ctx context.Context, tks ...domain.Task) error {
+	txn, err := t.db.BeginTx(ctx, nil)
 	if err != nil {
-		return fmt.Errorf("update error: %w", err)
+		return fmt.Errorf("tx begin: %w", err)
+	}
+	query := `UPDATE tasks SET position=$2, name=$3, description=$4, colum_id=$5 FROM tasks WHERE id = $1`
+	stmt, err := txn.Prepare(query)
+	if err != nil {
+		return fmt.Errorf("tx prepare: %w", err)
+	}
+	defer stmt.Close()
+
+	for _, tk := range tks {
+		_, err = t.db.ExecContext(ctx, query, tk.ID, tk.Position, tk.Name, tk.Description, tk.ColumnID)
+		if err != nil {
+			return fmt.Errorf("smt exec: %w", err)
+		}
+	}
+	if err = stmt.Close(); err != nil {
+		return fmt.Errorf("stm close: %w", err)
+	}
+	if err = txn.Commit(); err != nil {
+		return fmt.Errorf("tx commit: %w", err)
 	}
 
 	return nil

@@ -446,7 +446,7 @@ var _ domain.TaskRepository = &TaskRepositoryMock{}
 //             StoreFunc: func(ctx context.Context, t *domain.Task) error {
 // 	               panic("mock out the Store method")
 //             },
-//             UpdateFunc: func(ctx context.Context, tk *domain.Task) error {
+//             UpdateFunc: func(ctx context.Context, tks ...domain.Task) error {
 // 	               panic("mock out the Update method")
 //             },
 //         }
@@ -475,7 +475,7 @@ type TaskRepositoryMock struct {
 	StoreFunc func(ctx context.Context, t *domain.Task) error
 
 	// UpdateFunc mocks the Update method.
-	UpdateFunc func(ctx context.Context, tk *domain.Task) error
+	UpdateFunc func(ctx context.Context, tks ...domain.Task) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -523,8 +523,8 @@ type TaskRepositoryMock struct {
 		Update []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// Tk is the tk argument value.
-			Tk *domain.Task
+			// Tks is the tks argument value.
+			Tks []domain.Task
 		}
 	}
 	lockDelete           sync.RWMutex
@@ -743,21 +743,21 @@ func (mock *TaskRepositoryMock) StoreCalls() []struct {
 }
 
 // Update calls UpdateFunc.
-func (mock *TaskRepositoryMock) Update(ctx context.Context, tk *domain.Task) error {
+func (mock *TaskRepositoryMock) Update(ctx context.Context, tks ...domain.Task) error {
 	if mock.UpdateFunc == nil {
 		panic("TaskRepositoryMock.UpdateFunc: method is nil but TaskRepository.Update was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
-		Tk  *domain.Task
+		Tks []domain.Task
 	}{
 		Ctx: ctx,
-		Tk:  tk,
+		Tks: tks,
 	}
 	mock.lockUpdate.Lock()
 	mock.calls.Update = append(mock.calls.Update, callInfo)
 	mock.lockUpdate.Unlock()
-	return mock.UpdateFunc(ctx, tk)
+	return mock.UpdateFunc(ctx, tks...)
 }
 
 // UpdateCalls gets all the calls that were made to Update.
@@ -765,11 +765,11 @@ func (mock *TaskRepositoryMock) Update(ctx context.Context, tk *domain.Task) err
 //     len(mockedTaskRepository.UpdateCalls())
 func (mock *TaskRepositoryMock) UpdateCalls() []struct {
 	Ctx context.Context
-	Tk  *domain.Task
+	Tks []domain.Task
 } {
 	var calls []struct {
 		Ctx context.Context
-		Tk  *domain.Task
+		Tks []domain.Task
 	}
 	mock.lockUpdate.RLock()
 	calls = mock.calls.Update

@@ -38,6 +38,9 @@ var _ domain.ProjectUsecase = &ProjectUsecaseMock{}
 //             StoreFunc: func(in1 context.Context, in2 *domain.Project) error {
 // 	               panic("mock out the Store method")
 //             },
+//             StoreColumnFunc: func(in1 context.Context, in2 *domain.Column) error {
+// 	               panic("mock out the StoreColumn method")
+//             },
 //             UpdateFunc: func(ctx context.Context, pr *domain.Project) error {
 // 	               panic("mock out the Update method")
 //             },
@@ -65,6 +68,9 @@ type ProjectUsecaseMock struct {
 
 	// StoreFunc mocks the Store method.
 	StoreFunc func(in1 context.Context, in2 *domain.Project) error
+
+	// StoreColumnFunc mocks the StoreColumn method.
+	StoreColumnFunc func(in1 context.Context, in2 *domain.Column) error
 
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(ctx context.Context, pr *domain.Project) error
@@ -111,6 +117,13 @@ type ProjectUsecaseMock struct {
 			// In2 is the in2 argument value.
 			In2 *domain.Project
 		}
+		// StoreColumn holds details about calls to the StoreColumn method.
+		StoreColumn []struct {
+			// In1 is the in1 argument value.
+			In1 context.Context
+			// In2 is the in2 argument value.
+			In2 *domain.Column
+		}
 		// Update holds details about calls to the Update method.
 		Update []struct {
 			// Ctx is the ctx argument value.
@@ -125,6 +138,7 @@ type ProjectUsecaseMock struct {
 	lockFetchTasks   sync.RWMutex
 	lockGetByID      sync.RWMutex
 	lockStore        sync.RWMutex
+	lockStoreColumn  sync.RWMutex
 	lockUpdate       sync.RWMutex
 }
 
@@ -331,6 +345,41 @@ func (mock *ProjectUsecaseMock) StoreCalls() []struct {
 	mock.lockStore.RLock()
 	calls = mock.calls.Store
 	mock.lockStore.RUnlock()
+	return calls
+}
+
+// StoreColumn calls StoreColumnFunc.
+func (mock *ProjectUsecaseMock) StoreColumn(in1 context.Context, in2 *domain.Column) error {
+	if mock.StoreColumnFunc == nil {
+		panic("ProjectUsecaseMock.StoreColumnFunc: method is nil but ProjectUsecase.StoreColumn was just called")
+	}
+	callInfo := struct {
+		In1 context.Context
+		In2 *domain.Column
+	}{
+		In1: in1,
+		In2: in2,
+	}
+	mock.lockStoreColumn.Lock()
+	mock.calls.StoreColumn = append(mock.calls.StoreColumn, callInfo)
+	mock.lockStoreColumn.Unlock()
+	return mock.StoreColumnFunc(in1, in2)
+}
+
+// StoreColumnCalls gets all the calls that were made to StoreColumn.
+// Check the length with:
+//     len(mockedProjectUsecase.StoreColumnCalls())
+func (mock *ProjectUsecaseMock) StoreColumnCalls() []struct {
+	In1 context.Context
+	In2 *domain.Column
+} {
+	var calls []struct {
+		In1 context.Context
+		In2 *domain.Column
+	}
+	mock.lockStoreColumn.RLock()
+	calls = mock.calls.StoreColumn
+	mock.lockStoreColumn.RUnlock()
 	return calls
 }
 

@@ -23,6 +23,7 @@ type ProjectUsecase interface {
 	Store(context.Context, *Project) error
 	Delete(ctx context.Context, id uuid.UUID) error
 	FetchColumns(ctx context.Context, id uuid.UUID) ([]Column, error)
+	StoreColumn(context.Context, *Column) error
 	FetchTasks(ctx context.Context, id uuid.UUID) ([]Task, error)
 }
 

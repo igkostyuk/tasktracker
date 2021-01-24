@@ -145,6 +145,125 @@ func TestFetchColumnsErrors(t *testing.T) {
 	}
 }
 
+func TestStoreColumn(t *testing.T) {
+	is := helper.New(t)
+	id := uuid.New()
+	// nolint:exhaustivestruct
+	want := domain.Column{Name: "testName", Status: "testStatus", ProjectID: id}
+
+	// nolint:exhaustivestruct
+	mockedProjectUsecase := &mocks.ProjectUsecaseMock{
+		StoreColumnFunc: func(ctx context.Context, cl *domain.Column) error {
+			return nil
+		},
+	}
+	jsonData, err := json.Marshal(want)
+	is.NoErr(err)
+	path := fmt.Sprintf("/%s/columns", id.String())
+	request, err := http.NewRequestWithContext(context.Background(), http.MethodPost, path, bytes.NewBuffer(jsonData))
+	is.NoErr(err)
+	request.Header.Set("Content-Type", "application/json")
+	response := httptest.NewRecorder()
+
+	projectDelivery.New(mockedProjectUsecase).ServeHTTP(response, request)
+
+	is.Equal(response.Code, http.StatusOK)
+	var got domain.Column
+	err = json.NewDecoder(response.Body).Decode(&got)
+	is.NoErr(err)
+
+	is.Equal(want, got)
+	cs := mockedProjectUsecase.StoreColumnCalls()
+	is.Equal(len(cs), 1)
+	is.Equal(cs[0].In2.ProjectID, id)
+}
+
+//nolint:funlen
+func TestStoreColumnErrors(t *testing.T) {
+	tt := []struct {
+		name      string
+		path      string
+		column    string
+		code      int
+		message   string
+		mockError error
+	}{
+		{
+			name:      "400",
+			path:      fmt.Sprintf("/%s/columns", validUUIDString),
+			column:    `{"name":"testName"}`,
+			code:      http.StatusBadRequest,
+			message:   "validation: Key: 'Column.Status' Error:Field validation for 'Status' failed on the 'required' tag",
+			mockError: nil,
+		},
+		{
+			name:      "400",
+			path:      fmt.Sprintf("/%s/columns", validUUIDString),
+			column:    `{"status":"testStatus"}`,
+			code:      http.StatusBadRequest,
+			message:   "validation: Key: 'Column.Name' Error:Field validation for 'Name' failed on the 'required' tag",
+			mockError: nil,
+		},
+		{
+			name:      "404",
+			path:      fmt.Sprintf("/%s/columns", "invalidUUID"),
+			column:    `{"status":"testStatus"}`,
+			code:      http.StatusNotFound,
+			message:   domain.ErrNotFound.Error(),
+			mockError: nil,
+		},
+		{
+			name:      "409",
+			path:      fmt.Sprintf("/%s/columns", validUUIDString),
+			column:    `{"name":"testName","status":"testStatus"}`,
+			code:      http.StatusConflict,
+			message:   domain.ErrColumnName.Error(),
+			mockError: domain.ErrColumnName,
+		},
+		{
+			name:      "422",
+			path:      fmt.Sprintf("/%s/columns", validUUIDString),
+			column:    ``,
+			code:      http.StatusUnprocessableEntity,
+			message:   "EOF",
+			mockError: nil,
+		},
+		{
+			name:      "500",
+			path:      fmt.Sprintf("/%s/columns", validUUIDString),
+			column:    `{"name":"testName","status":"testStatus"}`,
+			code:      http.StatusInternalServerError,
+			message:   domain.ErrInternalServerError.Error(),
+			mockError: domain.ErrInternalServerError,
+		},
+	}
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			is := helper.New(t)
+			// nolint:exhaustivestruct
+			mockedProjectUsecase := &mocks.ProjectUsecaseMock{
+				StoreColumnFunc: func(ctx context.Context, cl *domain.Column) error {
+					return tc.mockError
+				},
+			}
+			request, err := http.NewRequestWithContext(
+				context.Background(), http.MethodPost,
+				tc.path, strings.NewReader(tc.column),
+			)
+			is.NoErr(err)
+			request.Header.Set("Content-Type", "application/json")
+			checkError(t, mockedProjectUsecase, request, tc.code, tc.message)
+
+			if tc.mockError != nil {
+				is.Equal(len(mockedProjectUsecase.StoreColumnCalls()), 1)
+
+				return
+			}
+			is.Equal(len(mockedProjectUsecase.StoreColumnCalls()), 0)
+		})
+	}
+}
+
 func TestFetchTasks(t *testing.T) {
 	is := helper.New(t)
 	want := []domain.Task{{Name: "1", Position: 1, Description: "testDescription"}}

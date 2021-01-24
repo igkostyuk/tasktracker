@@ -30,6 +30,7 @@ func New(us domain.ProjectUsecase) chi.Router {
 		r.Put("/", handler.Update)
 		r.Delete("/", handler.Delete)
 		r.Get("/columns", handler.FetchColumns)
+		r.Post("/columns", handler.StoreColumn)
 		r.Get("/tasks", handler.FetchTasks)
 	})
 
@@ -83,6 +84,59 @@ func (p *projectHandler) FetchColumns(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	web.Respond(w, r, columns, http.StatusOK)
+}
+
+func isColumnRequestValid(m *domain.Column) (bool, error) {
+	validate := validator.New()
+	err := validate.Struct(m)
+	if err != nil {
+		return false, fmt.Errorf("validation: %w", err)
+	}
+
+	return true, nil
+}
+
+// Store godoc
+// @Summary Add a column
+// @Description add by json column
+// @Tags columns
+// @Accept  json
+// @Produce  json
+// @Param id path string true "project ID" format(uuid)
+// @Param column body domain.Column true "Add column"
+// @Success 200 {object} domain.Column
+// @Failure 400 {object} web.HTTPError
+// @Failure 404 {object} web.HTTPError
+// @Failure 409 {object} web.HTTPError
+// @Failure 422 {object} web.HTTPError
+// @Failure 500 {object} web.HTTPError
+// @Router /projects/{id}/columns [post]
+// Store will store the column by given request body and Project ID.
+func (p *projectHandler) StoreColumn(w http.ResponseWriter, r *http.Request) {
+	id, err := uuid.Parse(chi.URLParam(r, "projectID"))
+	if err != nil {
+		web.RespondError(w, r, domain.ErrNotFound, http.StatusNotFound)
+
+		return
+	}
+	var column domain.Column
+	column.ProjectID = id
+	if err := json.NewDecoder(r.Body).Decode(&column); err != nil {
+		web.RespondError(w, r, err, http.StatusUnprocessableEntity)
+
+		return
+	}
+	if ok, err := isColumnRequestValid(&column); !ok {
+		web.RespondError(w, r, err, http.StatusBadRequest)
+
+		return
+	}
+	if err := p.projectUsecase.StoreColumn(r.Context(), &column); err != nil {
+		web.RespondError(w, r, err, getStatusCode(err))
+
+		return
+	}
+	web.Respond(w, r, column, http.StatusOK)
 }
 
 // FetchTasks godoc
@@ -259,6 +313,8 @@ func getStatusCode(err error) int {
 	case errors.Is(err, domain.ErrNotFound):
 		return http.StatusNotFound
 	case errors.Is(err, domain.ErrConflict):
+		return http.StatusConflict
+	case errors.Is(err, domain.ErrColumnName):
 		return http.StatusConflict
 	default:
 		return http.StatusInternalServerError

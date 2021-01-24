@@ -35,8 +35,11 @@ var _ domain.ColumnUsecase = &ColumnUsecaseMock{}
 //             GetByIDFunc: func(ctx context.Context, id uuid.UUID) (domain.Column, error) {
 // 	               panic("mock out the GetByID method")
 //             },
-//             StoreFunc: func(in1 context.Context, in2 *domain.Column) error {
-// 	               panic("mock out the Store method")
+//             MoveLeftFunc: func(ctx context.Context, old *domain.Column, cl *domain.Column, cls []domain.Column) error {
+// 	               panic("mock out the MoveLeft method")
+//             },
+//             MoveRightFunc: func(ctx context.Context, old *domain.Column, cl *domain.Column, cls []domain.Column) error {
+// 	               panic("mock out the MoveRight method")
 //             },
 //             UpdateFunc: func(ctx context.Context, cl *domain.Column) error {
 // 	               panic("mock out the Update method")
@@ -63,8 +66,11 @@ type ColumnUsecaseMock struct {
 	// GetByIDFunc mocks the GetByID method.
 	GetByIDFunc func(ctx context.Context, id uuid.UUID) (domain.Column, error)
 
-	// StoreFunc mocks the Store method.
-	StoreFunc func(in1 context.Context, in2 *domain.Column) error
+	// MoveLeftFunc mocks the MoveLeft method.
+	MoveLeftFunc func(ctx context.Context, old *domain.Column, cl *domain.Column, cls []domain.Column) error
+
+	// MoveRightFunc mocks the MoveRight method.
+	MoveRightFunc func(ctx context.Context, old *domain.Column, cl *domain.Column, cls []domain.Column) error
 
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(ctx context.Context, cl *domain.Column) error
@@ -104,12 +110,27 @@ type ColumnUsecaseMock struct {
 			// ID is the id argument value.
 			ID uuid.UUID
 		}
-		// Store holds details about calls to the Store method.
-		Store []struct {
-			// In1 is the in1 argument value.
-			In1 context.Context
-			// In2 is the in2 argument value.
-			In2 *domain.Column
+		// MoveLeft holds details about calls to the MoveLeft method.
+		MoveLeft []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Old is the old argument value.
+			Old *domain.Column
+			// Cl is the cl argument value.
+			Cl *domain.Column
+			// Cls is the cls argument value.
+			Cls []domain.Column
+		}
+		// MoveRight holds details about calls to the MoveRight method.
+		MoveRight []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Old is the old argument value.
+			Old *domain.Column
+			// Cl is the cl argument value.
+			Cl *domain.Column
+			// Cls is the cls argument value.
+			Cls []domain.Column
 		}
 		// Update holds details about calls to the Update method.
 		Update []struct {
@@ -124,7 +145,8 @@ type ColumnUsecaseMock struct {
 	lockFetchByProjectID sync.RWMutex
 	lockFetchTasks       sync.RWMutex
 	lockGetByID          sync.RWMutex
-	lockStore            sync.RWMutex
+	lockMoveLeft         sync.RWMutex
+	lockMoveRight        sync.RWMutex
 	lockUpdate           sync.RWMutex
 }
 
@@ -299,38 +321,89 @@ func (mock *ColumnUsecaseMock) GetByIDCalls() []struct {
 	return calls
 }
 
-// Store calls StoreFunc.
-func (mock *ColumnUsecaseMock) Store(in1 context.Context, in2 *domain.Column) error {
-	if mock.StoreFunc == nil {
-		panic("ColumnUsecaseMock.StoreFunc: method is nil but ColumnUsecase.Store was just called")
+// MoveLeft calls MoveLeftFunc.
+func (mock *ColumnUsecaseMock) MoveLeft(ctx context.Context, old *domain.Column, cl *domain.Column, cls []domain.Column) error {
+	if mock.MoveLeftFunc == nil {
+		panic("ColumnUsecaseMock.MoveLeftFunc: method is nil but ColumnUsecase.MoveLeft was just called")
 	}
 	callInfo := struct {
-		In1 context.Context
-		In2 *domain.Column
+		Ctx context.Context
+		Old *domain.Column
+		Cl  *domain.Column
+		Cls []domain.Column
 	}{
-		In1: in1,
-		In2: in2,
+		Ctx: ctx,
+		Old: old,
+		Cl:  cl,
+		Cls: cls,
 	}
-	mock.lockStore.Lock()
-	mock.calls.Store = append(mock.calls.Store, callInfo)
-	mock.lockStore.Unlock()
-	return mock.StoreFunc(in1, in2)
+	mock.lockMoveLeft.Lock()
+	mock.calls.MoveLeft = append(mock.calls.MoveLeft, callInfo)
+	mock.lockMoveLeft.Unlock()
+	return mock.MoveLeftFunc(ctx, old, cl, cls)
 }
 
-// StoreCalls gets all the calls that were made to Store.
+// MoveLeftCalls gets all the calls that were made to MoveLeft.
 // Check the length with:
-//     len(mockedColumnUsecase.StoreCalls())
-func (mock *ColumnUsecaseMock) StoreCalls() []struct {
-	In1 context.Context
-	In2 *domain.Column
+//     len(mockedColumnUsecase.MoveLeftCalls())
+func (mock *ColumnUsecaseMock) MoveLeftCalls() []struct {
+	Ctx context.Context
+	Old *domain.Column
+	Cl  *domain.Column
+	Cls []domain.Column
 } {
 	var calls []struct {
-		In1 context.Context
-		In2 *domain.Column
+		Ctx context.Context
+		Old *domain.Column
+		Cl  *domain.Column
+		Cls []domain.Column
 	}
-	mock.lockStore.RLock()
-	calls = mock.calls.Store
-	mock.lockStore.RUnlock()
+	mock.lockMoveLeft.RLock()
+	calls = mock.calls.MoveLeft
+	mock.lockMoveLeft.RUnlock()
+	return calls
+}
+
+// MoveRight calls MoveRightFunc.
+func (mock *ColumnUsecaseMock) MoveRight(ctx context.Context, old *domain.Column, cl *domain.Column, cls []domain.Column) error {
+	if mock.MoveRightFunc == nil {
+		panic("ColumnUsecaseMock.MoveRightFunc: method is nil but ColumnUsecase.MoveRight was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		Old *domain.Column
+		Cl  *domain.Column
+		Cls []domain.Column
+	}{
+		Ctx: ctx,
+		Old: old,
+		Cl:  cl,
+		Cls: cls,
+	}
+	mock.lockMoveRight.Lock()
+	mock.calls.MoveRight = append(mock.calls.MoveRight, callInfo)
+	mock.lockMoveRight.Unlock()
+	return mock.MoveRightFunc(ctx, old, cl, cls)
+}
+
+// MoveRightCalls gets all the calls that were made to MoveRight.
+// Check the length with:
+//     len(mockedColumnUsecase.MoveRightCalls())
+func (mock *ColumnUsecaseMock) MoveRightCalls() []struct {
+	Ctx context.Context
+	Old *domain.Column
+	Cl  *domain.Column
+	Cls []domain.Column
+} {
+	var calls []struct {
+		Ctx context.Context
+		Old *domain.Column
+		Cl  *domain.Column
+		Cls []domain.Column
+	}
+	mock.lockMoveRight.RLock()
+	calls = mock.calls.MoveRight
+	mock.lockMoveRight.RUnlock()
 	return calls
 }
 
@@ -394,7 +467,7 @@ var _ domain.ColumnRepository = &ColumnRepositoryMock{}
 //             StoreFunc: func(ctx context.Context, c *domain.Column) error {
 // 	               panic("mock out the Store method")
 //             },
-//             UpdateFunc: func(ctx context.Context, cl *domain.Column) error {
+//             UpdateFunc: func(ctx context.Context, cls ...domain.Column) error {
 // 	               panic("mock out the Update method")
 //             },
 //         }
@@ -420,7 +493,7 @@ type ColumnRepositoryMock struct {
 	StoreFunc func(ctx context.Context, c *domain.Column) error
 
 	// UpdateFunc mocks the Update method.
-	UpdateFunc func(ctx context.Context, cl *domain.Column) error
+	UpdateFunc func(ctx context.Context, cls ...domain.Column) error
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -461,8 +534,8 @@ type ColumnRepositoryMock struct {
 		Update []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-			// Cl is the cl argument value.
-			Cl *domain.Column
+			// Cls is the cls argument value.
+			Cls []domain.Column
 		}
 	}
 	lockDelete           sync.RWMutex
@@ -645,21 +718,21 @@ func (mock *ColumnRepositoryMock) StoreCalls() []struct {
 }
 
 // Update calls UpdateFunc.
-func (mock *ColumnRepositoryMock) Update(ctx context.Context, cl *domain.Column) error {
+func (mock *ColumnRepositoryMock) Update(ctx context.Context, cls ...domain.Column) error {
 	if mock.UpdateFunc == nil {
 		panic("ColumnRepositoryMock.UpdateFunc: method is nil but ColumnRepository.Update was just called")
 	}
 	callInfo := struct {
 		Ctx context.Context
-		Cl  *domain.Column
+		Cls []domain.Column
 	}{
 		Ctx: ctx,
-		Cl:  cl,
+		Cls: cls,
 	}
 	mock.lockUpdate.Lock()
 	mock.calls.Update = append(mock.calls.Update, callInfo)
 	mock.lockUpdate.Unlock()
-	return mock.UpdateFunc(ctx, cl)
+	return mock.UpdateFunc(ctx, cls...)
 }
 
 // UpdateCalls gets all the calls that were made to Update.
@@ -667,11 +740,11 @@ func (mock *ColumnRepositoryMock) Update(ctx context.Context, cl *domain.Column)
 //     len(mockedColumnRepository.UpdateCalls())
 func (mock *ColumnRepositoryMock) UpdateCalls() []struct {
 	Ctx context.Context
-	Cl  *domain.Column
+	Cls []domain.Column
 } {
 	var calls []struct {
 		Ctx context.Context
-		Cl  *domain.Column
+		Cls []domain.Column
 	}
 	mock.lockUpdate.RLock()
 	calls = mock.calls.Update

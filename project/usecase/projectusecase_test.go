@@ -3,6 +3,7 @@ package usecase_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/google/uuid"
@@ -82,6 +83,126 @@ func TestFetchColumnsError(t *testing.T) {
 	is.Equal(cp[0].ID, id)
 	cc := mc.FetchByProjectIDCalls()
 	is.Equal(len(cc), 0)
+}
+
+// nolint:exhaustivestruct
+func TestStoreColumn(t *testing.T) {
+	is := helper.New(t)
+
+	tt := []struct {
+		name string
+		cl   domain.Column
+	}{
+		{"with position change", domain.Column{Name: "test", Position: 1}},
+		{"with position change", domain.Column{Name: "test", Position: 0}},
+		{"without position change", domain.Column{Name: "test", Position: 2}},
+		{"with position more then number existing", domain.Column{Name: "test", Position: 3}},
+	}
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			columns := []domain.Column{{Name: "0", Position: 0}, {Name: "1", Position: 1}}
+			mp := &mocks.ProjectRepositoryMock{
+				GetByIDFunc: func(ctx context.Context, id uuid.UUID) (domain.Project, error) {
+					return domain.Project{}, nil
+				},
+			}
+			// nolint:exhaustivestruct
+			mc := &mocks.ColumnRepositoryMock{
+				FetchByProjectIDFunc: func(ctx context.Context, id uuid.UUID) ([]domain.Column, error) {
+					return columns, nil
+				},
+				UpdateFunc: func(ctx context.Context, cls ...domain.Column) error {
+					return nil
+				},
+				StoreFunc: func(ctx context.Context, c *domain.Column) error {
+					return nil
+				},
+			}
+			u := projectUsecase.New(mp, mc, &mocks.TaskRepositoryMock{})
+			err := u.StoreColumn(context.TODO(), &tc.cl)
+			is.NoErr(err)
+			cg := mp.GetByIDCalls()
+			cf := mc.FetchByProjectIDCalls()
+			cu := mc.UpdateCalls()
+			cs := mc.StoreCalls()
+			is.Equal(len(cg), 1)
+			is.Equal(cg[0].ID, tc.cl.ID)
+			is.Equal(len(cf), 1)
+			is.Equal(len(cs), 1)
+			is.Equal(cs[0].C, &tc.cl)
+			if tc.cl.Position >= len(columns) {
+				is.Equal(len(cu), 0)
+			}
+			if tc.cl.Position == 1 {
+				is.Equal(len(cu), 1)
+				is.Equal(cu[0].Cls, []domain.Column{{Name: "1", Position: 2}})
+			}
+			if tc.cl.Position == 0 {
+				is.Equal(len(cu), 1)
+				is.Equal(cu[0].Cls, []domain.Column{{Name: "0", Position: 1}, {Name: "1", Position: 2}})
+			}
+		})
+	}
+}
+
+// nolint:exhaustivestruct
+func TestStoreColumnErrors(t *testing.T) {
+	is := helper.New(t)
+
+	tt := []struct {
+		name         string
+		cl           domain.Column
+		getByIDError error
+		fetchError   error
+		updateError  error
+	}{
+		{
+			"get project by id error",
+			domain.Column{Name: "nottest", Position: 1},
+			fmt.Errorf("error"), nil, nil,
+		},
+		{
+			"fetch by project id error",
+			domain.Column{Name: "nottest", Position: 1},
+			nil, fmt.Errorf("error"), nil,
+		},
+		{
+			"name not unique",
+			domain.Column{Name: "test", Position: 1},
+			nil, nil, nil,
+		},
+		{
+			"update error",
+			domain.Column{Name: "nottest", Position: 0},
+			nil, nil, fmt.Errorf("error"),
+		},
+	}
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			columns := []domain.Column{{ID: uuid.New(), Name: "test", Position: 0}}
+			// nolint:exhaustivestruct
+			mp := &mocks.ProjectRepositoryMock{
+				GetByIDFunc: func(ctx context.Context, id uuid.UUID) (domain.Project, error) {
+					return domain.Project{}, tc.getByIDError
+				},
+			}
+			// nolint:exhaustivestruct
+			mc := &mocks.ColumnRepositoryMock{
+				FetchByProjectIDFunc: func(ctx context.Context, id uuid.UUID) ([]domain.Column, error) {
+					return columns, tc.fetchError
+				},
+				UpdateFunc: func(ctx context.Context, cls ...domain.Column) error {
+					return tc.updateError
+				},
+				StoreFunc: func(ctx context.Context, c *domain.Column) error {
+					return nil
+				},
+			}
+			u := projectUsecase.New(mp, mc, &mocks.TaskRepositoryMock{})
+			err := u.StoreColumn(context.TODO(), &tc.cl)
+			is.True(err != nil)
+		})
+	}
 }
 
 func TestFetchTask(t *testing.T) {

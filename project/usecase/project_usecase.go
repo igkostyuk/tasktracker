@@ -31,6 +31,35 @@ func (p *projectUsecase) FetchColumns(ctx context.Context, id uuid.UUID) ([]doma
 	return p.columnRepo.FetchByProjectID(ctx, id)
 }
 
+func (p *projectUsecase) StoreColumn(ctx context.Context, cm *domain.Column) error {
+	_, err := p.projectRepo.GetByID(ctx, cm.ProjectID)
+	if err != nil {
+		return fmt.Errorf("get project by id: %w", err)
+	}
+	columns, err := p.columnRepo.FetchByProjectID(ctx, cm.ProjectID)
+	if err != nil {
+		return fmt.Errorf("fetch by project id: %w", err)
+	}
+	if !isNameUnique(columns, cm) {
+		return domain.ErrColumnName
+	}
+	if cm.Position >= len(columns) {
+		cm.Position = len(columns)
+
+		return p.columnRepo.Store(ctx, cm)
+	}
+
+	uc := columns[cm.Position:]
+	for i := range uc {
+		uc[i].Position++
+	}
+	if err = p.columnRepo.Update(ctx, uc...); err != nil {
+		return fmt.Errorf("update positions: %w", err)
+	}
+
+	return p.columnRepo.Store(ctx, cm)
+}
+
 func (p *projectUsecase) FetchTasks(ctx context.Context, id uuid.UUID) ([]domain.Task, error) {
 	if _, err := p.projectRepo.GetByID(ctx, id); err != nil {
 		return nil, fmt.Errorf("fetch tasks by project id: %w", err)
@@ -60,6 +89,7 @@ func (p *projectUsecase) Store(ctx context.Context, m *domain.Project) error {
 	err = p.columnRepo.Store(ctx, &domain.Column{
 		Name:      "Default",
 		Status:    "Default",
+		Position:  0,
 		ProjectID: m.ID,
 	})
 	if err != nil {
@@ -75,4 +105,14 @@ func (p *projectUsecase) Delete(ctx context.Context, id uuid.UUID) error {
 	}
 
 	return p.projectRepo.Delete(ctx, id)
+}
+
+func isNameUnique(columns []domain.Column, column *domain.Column) bool {
+	for _, c := range columns {
+		if column.Name == c.Name && column.ID != c.ID {
+			return false
+		}
+	}
+
+	return true
 }

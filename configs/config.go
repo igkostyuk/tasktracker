@@ -10,7 +10,7 @@ import (
 type (
 	Config struct {
 		APIHost         string        `envconfig:"API_LISTEN_URL"       default:"0.0.0.0:3000"`
-		DebugHost       string        `envconfig:"API_LISTEN_URL"       default:"0.0.0.0:4000"`
+		DebugHost       string        `envconfig:"API_DEBUG_URL"        default:"0.0.0.0:4000"`
 		ReadTimeout     time.Duration `envconfig:"API_READ_TIMEOUT"     default:"5s"`
 		WriteTimeout    time.Duration `envconfig:"API_WRITE_TIMEOUT"    default:"5s"`
 		ShutdownTimeout time.Duration `envconfig:"API_SHUTDOWN_TIMEOUT" default:"5s"`

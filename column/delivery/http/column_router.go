@@ -24,9 +24,9 @@ func New(us domain.ColumnUsecase) chi.Router {
 	}
 	r := chi.NewRouter()
 	r.Get("/", handler.Fetch)
-	r.Post("/", handler.Store)
 	r.Route("/{columnID}", func(r chi.Router) {
 		r.Get("/", handler.GetByID)
+		r.Put("/", handler.Update)
 		r.Delete("/", handler.Delete)
 		r.Get("/tasks", handler.FetchTasks)
 	})
@@ -122,22 +122,30 @@ func isRequestValid(m *domain.Column) (bool, error) {
 }
 
 // Store godoc
-// @Summary Add a column
-// @Description add by json column
+// @Summary Update a column
+// @Description update by json column
 // @Tags columns
 // @Accept  json
 // @Produce  json
-// @Param column body domain.Column true "Add column"
+// @Param  id path string true "column ID"
+// @Param column body domain.Column true "Update column"
 // @Success 200 {object} domain.Column
 // @Failure 400 {object} web.HTTPError
 // @Failure 404 {object} web.HTTPError
 // @Failure 409 {object} web.HTTPError
 // @Failure 422 {object} web.HTTPError
 // @Failure 500 {object} web.HTTPError
-// @Router /columns [post]
-// Store will store the column by given request body.
-func (c *columnHandler) Store(w http.ResponseWriter, r *http.Request) {
+// @Router /columns/{id} [put]
+// Update will store the column by given request body.
+func (c *columnHandler) Update(w http.ResponseWriter, r *http.Request) {
+	id, err := uuid.Parse(chi.URLParam(r, "columnID"))
+	if err != nil {
+		web.RespondError(w, r, domain.ErrNotFound, http.StatusNotFound)
+
+		return
+	}
 	var column domain.Column
+	column.ID = id
 	if err := json.NewDecoder(r.Body).Decode(&column); err != nil {
 		web.RespondError(w, r, err, http.StatusUnprocessableEntity)
 
@@ -148,7 +156,7 @@ func (c *columnHandler) Store(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
-	if err := c.columnUsecase.Store(r.Context(), &column); err != nil {
+	if err := c.columnUsecase.Update(r.Context(), &column); err != nil {
 		web.RespondError(w, r, err, getStatusCode(err))
 
 		return
