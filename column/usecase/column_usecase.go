@@ -52,8 +52,8 @@ func (c *columnUsecase) Update(ctx context.Context, cl *domain.Column) error {
 	if err != nil {
 		return fmt.Errorf("fetch by project id: %w", err)
 	}
-	if !isNameUnique(columns, cl) {
-		return domain.ErrColumnName
+	if ok, err := isUnique(columns, cl); !ok {
+		return err
 	}
 	if cl.Position > len(columns)-1 {
 		cl.Position = len(columns) - 1
@@ -135,12 +135,18 @@ func (c *columnUsecase) moveTasks(ctx context.Context, columnID, leftColumnID uu
 	return c.taskRepo.Update(ctx, tasks...)
 }
 
-func isNameUnique(columns []domain.Column, column *domain.Column) bool {
+func isUnique(columns []domain.Column, column *domain.Column) (bool, error) {
 	for _, c := range columns {
-		if column.Name == c.Name && column.ID != c.ID {
-			return false
+		if column.ID == c.ID {
+			continue
+		}
+		if column.Name == c.Name {
+			return false, fmt.Errorf("column name: %w", domain.ErrUnique)
+		}
+		if column.Status == c.Status {
+			return false, fmt.Errorf("column status: %w", domain.ErrUnique)
 		}
 	}
 
-	return true
+	return true, nil
 }

@@ -172,6 +172,11 @@ func TestStoreColumnErrors(t *testing.T) {
 			nil, nil, nil,
 		},
 		{
+			"status not unique",
+			domain.Column{Name: "nottest", Status: "testStatus", Position: 1},
+			nil, nil, nil,
+		},
+		{
 			"update error",
 			domain.Column{Name: "nottest", Position: 0},
 			nil, nil, fmt.Errorf("error"),
@@ -179,7 +184,7 @@ func TestStoreColumnErrors(t *testing.T) {
 	}
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			columns := []domain.Column{{ID: uuid.New(), Name: "test", Position: 0}}
+			columns := []domain.Column{{ID: uuid.New(), Name: "test", Status: "testStatus", Position: 0}}
 			// nolint:exhaustivestruct
 			mp := &mocks.ProjectRepositoryMock{
 				GetByIDFunc: func(ctx context.Context, id uuid.UUID) (domain.Project, error) {

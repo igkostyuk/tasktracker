@@ -314,8 +314,8 @@ func getStatusCode(err error) int {
 		return http.StatusNotFound
 	case errors.Is(err, domain.ErrConflict):
 		return http.StatusConflict
-	case errors.Is(err, domain.ErrColumnName):
-		return http.StatusConflict
+	case errors.Is(err, domain.ErrUnique):
+		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
 	}

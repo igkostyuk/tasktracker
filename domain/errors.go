@@ -13,6 +13,6 @@ var (
 	ErrBadParamInput = errors.New("given param is not valid")
 	// ErrLastColumn will throw if trying to delete the last column.
 	ErrLastColumn = errors.New("the last column cannot be deleted")
-	// ErrColumnName will throw if column name not unique for project.
-	ErrColumnName = errors.New("column name must be unique")
+	// ErrUnique will throw if column name or status not unique for project.
+	ErrUnique = errors.New("must be unique")
 )

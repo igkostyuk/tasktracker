@@ -40,8 +40,8 @@ func (p *projectUsecase) StoreColumn(ctx context.Context, cm *domain.Column) err
 	if err != nil {
 		return fmt.Errorf("fetch by project id: %w", err)
 	}
-	if !isNameUnique(columns, cm) {
-		return domain.ErrColumnName
+	if ok, err := isUnique(columns, cm); !ok {
+		return err
 	}
 	if cm.Position >= len(columns) {
 		cm.Position = len(columns)
@@ -107,12 +107,18 @@ func (p *projectUsecase) Delete(ctx context.Context, id uuid.UUID) error {
 	return p.projectRepo.Delete(ctx, id)
 }
 
-func isNameUnique(columns []domain.Column, column *domain.Column) bool {
+func isUnique(columns []domain.Column, column *domain.Column) (bool, error) {
 	for _, c := range columns {
-		if column.Name == c.Name && column.ID != c.ID {
-			return false
+		if column.ID == c.ID {
+			continue
+		}
+		if column.Name == c.Name {
+			return false, fmt.Errorf("column name: %w", domain.ErrUnique)
+		}
+		if column.Status == c.Status {
+			return false, fmt.Errorf("column status: %w", domain.ErrUnique)
 		}
 	}
 
-	return true
+	return true, nil
 }

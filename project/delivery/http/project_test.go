@@ -217,8 +217,8 @@ func TestStoreColumnErrors(t *testing.T) {
 			path:      fmt.Sprintf("/%s/columns", validUUIDString),
 			column:    `{"name":"testName","status":"testStatus"}`,
 			code:      http.StatusConflict,
-			message:   domain.ErrColumnName.Error(),
-			mockError: domain.ErrColumnName,
+			message:   domain.ErrUnique.Error(),
+			mockError: domain.ErrUnique,
 		},
 		{
 			name:      "422",

@@ -203,8 +203,8 @@ func getStatusCode(err error) int {
 		return http.StatusConflict
 	case errors.Is(err, domain.ErrLastColumn):
 		return http.StatusConflict
-	case errors.Is(err, domain.ErrColumnName):
-		return http.StatusConflict
+	case errors.Is(err, domain.ErrUnique):
+		return http.StatusBadRequest
 	default:
 		return http.StatusInternalServerError
 	}
