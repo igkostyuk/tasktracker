@@ -32,6 +32,7 @@ func (c *commentRepository) fetch(ctx context.Context, query string, args ...int
 			&t.ID,
 			&t.Text,
 			&t.TaskID,
+			&t.CreatedAt,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("rows scan error: %w", err)
@@ -47,13 +48,13 @@ func (c *commentRepository) fetch(ctx context.Context, query string, args ...int
 }
 
 func (c *commentRepository) Fetch(ctx context.Context) ([]domain.Comment, error) {
-	query := `SELECT id, text, task_id FROM comments`
+	query := `SELECT id, text, task_id, date_created FROM comments ORDER BY date_created`
 
 	return c.fetch(ctx, query)
 }
 
 func (c *commentRepository) FetchByTaskID(ctx context.Context, id uuid.UUID) ([]domain.Comment, error) {
-	query := `SELECT id, text, task_id FROM comments WHERE task_id = $1`
+	query := `SELECT id, text, task_id, date_created FROM comments WHERE task_id = $1`
 
 	return c.fetch(ctx, query, id)
 }
@@ -65,6 +66,7 @@ func (c *commentRepository) getOne(ctx context.Context, query string, args ...in
 		&res.ID,
 		&res.Text,
 		&res.TaskID,
+		&res.CreatedAt,
 	)
 	if errors.Is(err, sql.ErrNoRows) {
 		return domain.Comment{}, fmt.Errorf("comment: %w", domain.ErrNotFound)
@@ -77,13 +79,13 @@ func (c *commentRepository) getOne(ctx context.Context, query string, args ...in
 }
 
 func (c *commentRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.Comment, error) {
-	query := `SELECT id, position, name, description, column_id FROM comments WHERE id = $1`
+	query := `SELECT id, text, task_id, date_created FROM comments WHERE id = $1`
 
 	return c.getOne(ctx, query, id)
 }
 
 func (c *commentRepository) Update(ctx context.Context, cm *domain.Comment) error {
-	query := `UPDATE comments SET taxt=$2, task_id=$3 FROM comments WHERE id = $1`
+	query := `UPDATE comments SET text=$2, task_id=$3 FROM comments WHERE id = $1`
 	_, err := c.db.ExecContext(ctx, query, cm.ID, cm.Text, cm.TaskID)
 	if err != nil {
 		return fmt.Errorf("update error: %w", err)
@@ -93,8 +95,8 @@ func (c *commentRepository) Update(ctx context.Context, cm *domain.Comment) erro
 }
 
 func (c *commentRepository) Store(ctx context.Context, ct *domain.Comment) error {
-	query := `INSERT INTO comments (text, task_id) VALUES ( $1, $2) RETURNING id`
-	row := c.db.QueryRowContext(ctx, query, ct.Text, ct.TaskID)
+	query := `INSERT INTO comments (text, task_id, date_created) VALUES ( $1, $2, $3) RETURNING id`
+	row := c.db.QueryRowContext(ctx, query, ct.Text, ct.TaskID, ct.CreatedAt)
 	err := row.Scan(&ct.ID)
 	if err != nil {
 		return fmt.Errorf("store error: %w", err)

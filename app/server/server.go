@@ -46,7 +46,7 @@ func New(cfg configs.Config, logger *zap.Logger, db *sql.DB) *http.Server {
 		)
 		r.Mount("/projects", projectDelivery.New(projectUsecase.New(projectRepo, columnRepo, taskRepo)))
 		r.Mount("/columns", columnDelivery.New(columnUsecase.New(columnRepo, taskRepo)))
-		r.Mount("/tasks", taskDelivery.New(taskUsecase.New(taskRepo, commentRepo)))
+		r.Mount("/tasks", taskDelivery.New(taskUsecase.New(columnRepo, taskRepo, commentRepo)))
 		r.Mount("/comments", commentDelivery.New(commentUsecase.New(commentRepo)))
 	})
 

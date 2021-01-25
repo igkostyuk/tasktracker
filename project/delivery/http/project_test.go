@@ -213,10 +213,10 @@ func TestStoreColumnErrors(t *testing.T) {
 			mockError: nil,
 		},
 		{
-			name:      "409",
+			name:      "400",
 			path:      fmt.Sprintf("/%s/columns", validUUIDString),
 			column:    `{"name":"testName","status":"testStatus"}`,
-			code:      http.StatusConflict,
+			code:      http.StatusBadRequest,
 			message:   domain.ErrUnique.Error(),
 			mockError: domain.ErrUnique,
 		},
@@ -539,7 +539,7 @@ func TestStoreErrors(t *testing.T) {
 func TestUpdate(t *testing.T) {
 	is := helper.New(t)
 	// nolint:exhaustivestruct
-	want := domain.Project{Name: "testName", Description: "testDescription"}
+	project := domain.Project{Name: "testName", Description: "testDescription"}
 
 	// nolint:exhaustivestruct
 	mockedProjectUsecase := &mocks.ProjectUsecaseMock{
@@ -547,7 +547,7 @@ func TestUpdate(t *testing.T) {
 			return nil
 		},
 	}
-	jsonData, err := json.Marshal(want)
+	jsonData, err := json.Marshal(project)
 	is.NoErr(err)
 	path := fmt.Sprintf("/%s", validUUIDString)
 	request, err := http.NewRequestWithContext(context.Background(), http.MethodPut, path, bytes.NewBuffer(jsonData))
@@ -561,7 +561,8 @@ func TestUpdate(t *testing.T) {
 	var got domain.Project
 	err = json.NewDecoder(response.Body).Decode(&got)
 	is.NoErr(err)
-
+	id, _ := uuid.Parse(validUUIDString)
+	want := domain.Project{Name: "testName", Description: "testDescription", ID: id}
 	is.Equal(want, got)
 	is.Equal(len(mockedProjectUsecase.UpdateCalls()), 1)
 }

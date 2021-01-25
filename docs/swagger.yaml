@@ -20,15 +20,18 @@ definitions:
     type: object
   domain.Comment:
     properties:
+      created_at:
+        readOnly: true
+        type: string
       id:
         readOnly: true
         type: string
       task_id:
+        readOnly: true
         type: string
       text:
         type: string
     required:
-    - task_id
     - text
     type: object
   domain.Project:
@@ -269,12 +272,12 @@ paths:
       summary: Get all comments
       tags:
       - comments
-    post:
+    put:
       consumes:
       - application/json
-      description: add by json comment
+      description: update by json comment
       parameters:
-      - description: Add comment
+      - description: Update comment
         in: body
         name: project
         required: true
@@ -307,7 +310,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/web.HTTPError'
-      summary: Add a comment
+      summary: Update a comment
       tags:
       - comments
   /comments/{id}:
@@ -561,7 +564,7 @@ paths:
             $ref: '#/definitions/web.HTTPError'
       summary: Get columns by project id
       tags:
-      - projects
+      - columns
     post:
       consumes:
       - application/json
@@ -642,7 +645,7 @@ paths:
             $ref: '#/definitions/web.HTTPError'
       summary: Get tasks by project id
       tags:
-      - projects
+      - tasks
   /tasks:
     get:
       description: get all tasks
@@ -771,6 +774,53 @@ paths:
       summary: Show a task
       tags:
       - tasks
+    put:
+      consumes:
+      - application/json
+      description: update by json task
+      parameters:
+      - description: task ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update task
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Task'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Task'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Update a task
+      tags:
+      - tasks
   /tasks/{id}/comments:
     get:
       description: get tasks by task id
@@ -805,4 +855,51 @@ paths:
       summary: Get comments by task id
       tags:
       - tasks
+    post:
+      consumes:
+      - application/json
+      description: add by json comment
+      parameters:
+      - description: task ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Add comment
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Comment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Add a comment
+      tags:
+      - comments
 swagger: "2.0"

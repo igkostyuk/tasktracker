@@ -40,7 +40,8 @@ func (p *projectUsecase) StoreColumn(ctx context.Context, cm *domain.Column) err
 	if err != nil {
 		return fmt.Errorf("fetch by project id: %w", err)
 	}
-	if ok, err := isUnique(columns, cm); !ok {
+	var ok bool
+	if ok, err = isUnique(columns, cm); !ok {
 		return err
 	}
 	if cm.Position >= len(columns) {

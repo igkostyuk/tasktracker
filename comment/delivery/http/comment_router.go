@@ -24,10 +24,10 @@ func New(us domain.CommentUsecase) chi.Router {
 	}
 	r := chi.NewRouter()
 	r.Get("/", handler.Fetch)
-	r.Post("/", handler.Store)
 	r.Route("/{commentID}", func(r chi.Router) {
 		r.Get("/", handler.GetByID)
 		r.Delete("/", handler.Delete)
+		r.Put("/", handler.Update)
 	})
 
 	return r
@@ -92,34 +92,41 @@ func isRequestValid(m *domain.Comment) (bool, error) {
 	return true, nil
 }
 
-// Store godoc
-// @Summary Add a comment
-// @Description add by json comment
+// Update godoc
+// @Summary Update a comment
+// @Description update by json comment
 // @Tags comments
 // @Accept  json
 // @Produce  json
-// @Param project body domain.Comment true "Add comment"
+// @Param project body domain.Comment true "Update comment"
 // @Success 200 {object} domain.Comment
 // @Failure 400 {object} web.HTTPError
 // @Failure 404 {object} web.HTTPError
 // @Failure 409 {object} web.HTTPError
 // @Failure 422 {object} web.HTTPError
 // @Failure 500 {object} web.HTTPError
-// @Router /comments [post]
-// Store will store the comment by given request body.
-func (c *commentHandler) Store(w http.ResponseWriter, r *http.Request) {
+// @Router /comments [put]
+// Update will update the comment by given request body.
+func (c *commentHandler) Update(w http.ResponseWriter, r *http.Request) {
+	id, err := uuid.Parse(chi.URLParam(r, "commentID"))
+	if err != nil {
+		web.RespondError(w, r, domain.ErrNotFound, http.StatusNotFound)
+
+		return
+	}
 	var comment domain.Comment
 	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
 		web.RespondError(w, r, err, http.StatusUnprocessableEntity)
 
 		return
 	}
+	comment.ID = id
 	if ok, err := isRequestValid(&comment); !ok {
 		web.RespondError(w, r, err, http.StatusBadRequest)
 
 		return
 	}
-	if err := c.commentUsecase.Store(r.Context(), &comment); err != nil {
+	if err := c.commentUsecase.Update(r.Context(), &comment); err != nil {
 		web.RespondError(w, r, err, getStatusCode(err))
 
 		return

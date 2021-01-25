@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS comments (
   id UUID DEFAULT uuid_generate_v4(),
   text varchar(5000),
   task_id UUID NOT NULL,
+  date_created  TIMESTAMP,
   FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
 
   PRIMARY KEY (id)

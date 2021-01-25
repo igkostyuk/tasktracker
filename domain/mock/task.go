@@ -20,17 +20,14 @@ var _ domain.TaskUsecase = &TaskUsecaseMock{}
 //
 //         // make and configure a mocked domain.TaskUsecase
 //         mockedTaskUsecase := &TaskUsecaseMock{
+//             ChangeColumnFunc: func(ctx context.Context, old *domain.Task, tk *domain.Task) error {
+// 	               panic("mock out the ChangeColumn method")
+//             },
 //             DeleteFunc: func(ctx context.Context, id uuid.UUID) error {
 // 	               panic("mock out the Delete method")
 //             },
 //             FetchFunc: func(ctx context.Context) ([]domain.Task, error) {
 // 	               panic("mock out the Fetch method")
-//             },
-//             FetchByColumnIDFunc: func(ctx context.Context, id uuid.UUID) ([]domain.Task, error) {
-// 	               panic("mock out the FetchByColumnID method")
-//             },
-//             FetchByProjectIDFunc: func(ctx context.Context, id uuid.UUID) ([]domain.Task, error) {
-// 	               panic("mock out the FetchByProjectID method")
 //             },
 //             FetchCommentsFunc: func(ctx context.Context, id uuid.UUID) ([]domain.Comment, error) {
 // 	               panic("mock out the FetchComments method")
@@ -38,8 +35,17 @@ var _ domain.TaskUsecase = &TaskUsecaseMock{}
 //             GetByIDFunc: func(ctx context.Context, id uuid.UUID) (domain.Task, error) {
 // 	               panic("mock out the GetByID method")
 //             },
+//             MoveLeftFunc: func(ctx context.Context, old *domain.Task, tk *domain.Task, tks []domain.Task) error {
+// 	               panic("mock out the MoveLeft method")
+//             },
+//             MoveRightFunc: func(ctx context.Context, old *domain.Task, tk *domain.Task, tks []domain.Task) error {
+// 	               panic("mock out the MoveRight method")
+//             },
 //             StoreFunc: func(in1 context.Context, in2 *domain.Task) error {
 // 	               panic("mock out the Store method")
+//             },
+//             StoreCommentFunc: func(ctx context.Context, cm *domain.Comment) error {
+// 	               panic("mock out the StoreComment method")
 //             },
 //             UpdateFunc: func(ctx context.Context, tk *domain.Task) error {
 // 	               panic("mock out the Update method")
@@ -51,17 +57,14 @@ var _ domain.TaskUsecase = &TaskUsecaseMock{}
 //
 //     }
 type TaskUsecaseMock struct {
+	// ChangeColumnFunc mocks the ChangeColumn method.
+	ChangeColumnFunc func(ctx context.Context, old *domain.Task, tk *domain.Task) error
+
 	// DeleteFunc mocks the Delete method.
 	DeleteFunc func(ctx context.Context, id uuid.UUID) error
 
 	// FetchFunc mocks the Fetch method.
 	FetchFunc func(ctx context.Context) ([]domain.Task, error)
-
-	// FetchByColumnIDFunc mocks the FetchByColumnID method.
-	FetchByColumnIDFunc func(ctx context.Context, id uuid.UUID) ([]domain.Task, error)
-
-	// FetchByProjectIDFunc mocks the FetchByProjectID method.
-	FetchByProjectIDFunc func(ctx context.Context, id uuid.UUID) ([]domain.Task, error)
 
 	// FetchCommentsFunc mocks the FetchComments method.
 	FetchCommentsFunc func(ctx context.Context, id uuid.UUID) ([]domain.Comment, error)
@@ -69,14 +72,32 @@ type TaskUsecaseMock struct {
 	// GetByIDFunc mocks the GetByID method.
 	GetByIDFunc func(ctx context.Context, id uuid.UUID) (domain.Task, error)
 
+	// MoveLeftFunc mocks the MoveLeft method.
+	MoveLeftFunc func(ctx context.Context, old *domain.Task, tk *domain.Task, tks []domain.Task) error
+
+	// MoveRightFunc mocks the MoveRight method.
+	MoveRightFunc func(ctx context.Context, old *domain.Task, tk *domain.Task, tks []domain.Task) error
+
 	// StoreFunc mocks the Store method.
 	StoreFunc func(in1 context.Context, in2 *domain.Task) error
+
+	// StoreCommentFunc mocks the StoreComment method.
+	StoreCommentFunc func(ctx context.Context, cm *domain.Comment) error
 
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(ctx context.Context, tk *domain.Task) error
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// ChangeColumn holds details about calls to the ChangeColumn method.
+		ChangeColumn []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Old is the old argument value.
+			Old *domain.Task
+			// Tk is the tk argument value.
+			Tk *domain.Task
+		}
 		// Delete holds details about calls to the Delete method.
 		Delete []struct {
 			// Ctx is the ctx argument value.
@@ -88,20 +109,6 @@ type TaskUsecaseMock struct {
 		Fetch []struct {
 			// Ctx is the ctx argument value.
 			Ctx context.Context
-		}
-		// FetchByColumnID holds details about calls to the FetchByColumnID method.
-		FetchByColumnID []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// ID is the id argument value.
-			ID uuid.UUID
-		}
-		// FetchByProjectID holds details about calls to the FetchByProjectID method.
-		FetchByProjectID []struct {
-			// Ctx is the ctx argument value.
-			Ctx context.Context
-			// ID is the id argument value.
-			ID uuid.UUID
 		}
 		// FetchComments holds details about calls to the FetchComments method.
 		FetchComments []struct {
@@ -117,12 +124,41 @@ type TaskUsecaseMock struct {
 			// ID is the id argument value.
 			ID uuid.UUID
 		}
+		// MoveLeft holds details about calls to the MoveLeft method.
+		MoveLeft []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Old is the old argument value.
+			Old *domain.Task
+			// Tk is the tk argument value.
+			Tk *domain.Task
+			// Tks is the tks argument value.
+			Tks []domain.Task
+		}
+		// MoveRight holds details about calls to the MoveRight method.
+		MoveRight []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Old is the old argument value.
+			Old *domain.Task
+			// Tk is the tk argument value.
+			Tk *domain.Task
+			// Tks is the tks argument value.
+			Tks []domain.Task
+		}
 		// Store holds details about calls to the Store method.
 		Store []struct {
 			// In1 is the in1 argument value.
 			In1 context.Context
 			// In2 is the in2 argument value.
 			In2 *domain.Task
+		}
+		// StoreComment holds details about calls to the StoreComment method.
+		StoreComment []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// Cm is the cm argument value.
+			Cm *domain.Comment
 		}
 		// Update holds details about calls to the Update method.
 		Update []struct {
@@ -132,14 +168,55 @@ type TaskUsecaseMock struct {
 			Tk *domain.Task
 		}
 	}
-	lockDelete           sync.RWMutex
-	lockFetch            sync.RWMutex
-	lockFetchByColumnID  sync.RWMutex
-	lockFetchByProjectID sync.RWMutex
-	lockFetchComments    sync.RWMutex
-	lockGetByID          sync.RWMutex
-	lockStore            sync.RWMutex
-	lockUpdate           sync.RWMutex
+	lockChangeColumn  sync.RWMutex
+	lockDelete        sync.RWMutex
+	lockFetch         sync.RWMutex
+	lockFetchComments sync.RWMutex
+	lockGetByID       sync.RWMutex
+	lockMoveLeft      sync.RWMutex
+	lockMoveRight     sync.RWMutex
+	lockStore         sync.RWMutex
+	lockStoreComment  sync.RWMutex
+	lockUpdate        sync.RWMutex
+}
+
+// ChangeColumn calls ChangeColumnFunc.
+func (mock *TaskUsecaseMock) ChangeColumn(ctx context.Context, old *domain.Task, tk *domain.Task) error {
+	if mock.ChangeColumnFunc == nil {
+		panic("TaskUsecaseMock.ChangeColumnFunc: method is nil but TaskUsecase.ChangeColumn was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		Old *domain.Task
+		Tk  *domain.Task
+	}{
+		Ctx: ctx,
+		Old: old,
+		Tk:  tk,
+	}
+	mock.lockChangeColumn.Lock()
+	mock.calls.ChangeColumn = append(mock.calls.ChangeColumn, callInfo)
+	mock.lockChangeColumn.Unlock()
+	return mock.ChangeColumnFunc(ctx, old, tk)
+}
+
+// ChangeColumnCalls gets all the calls that were made to ChangeColumn.
+// Check the length with:
+//     len(mockedTaskUsecase.ChangeColumnCalls())
+func (mock *TaskUsecaseMock) ChangeColumnCalls() []struct {
+	Ctx context.Context
+	Old *domain.Task
+	Tk  *domain.Task
+} {
+	var calls []struct {
+		Ctx context.Context
+		Old *domain.Task
+		Tk  *domain.Task
+	}
+	mock.lockChangeColumn.RLock()
+	calls = mock.calls.ChangeColumn
+	mock.lockChangeColumn.RUnlock()
+	return calls
 }
 
 // Delete calls DeleteFunc.
@@ -205,76 +282,6 @@ func (mock *TaskUsecaseMock) FetchCalls() []struct {
 	mock.lockFetch.RLock()
 	calls = mock.calls.Fetch
 	mock.lockFetch.RUnlock()
-	return calls
-}
-
-// FetchByColumnID calls FetchByColumnIDFunc.
-func (mock *TaskUsecaseMock) FetchByColumnID(ctx context.Context, id uuid.UUID) ([]domain.Task, error) {
-	if mock.FetchByColumnIDFunc == nil {
-		panic("TaskUsecaseMock.FetchByColumnIDFunc: method is nil but TaskUsecase.FetchByColumnID was just called")
-	}
-	callInfo := struct {
-		Ctx context.Context
-		ID  uuid.UUID
-	}{
-		Ctx: ctx,
-		ID:  id,
-	}
-	mock.lockFetchByColumnID.Lock()
-	mock.calls.FetchByColumnID = append(mock.calls.FetchByColumnID, callInfo)
-	mock.lockFetchByColumnID.Unlock()
-	return mock.FetchByColumnIDFunc(ctx, id)
-}
-
-// FetchByColumnIDCalls gets all the calls that were made to FetchByColumnID.
-// Check the length with:
-//     len(mockedTaskUsecase.FetchByColumnIDCalls())
-func (mock *TaskUsecaseMock) FetchByColumnIDCalls() []struct {
-	Ctx context.Context
-	ID  uuid.UUID
-} {
-	var calls []struct {
-		Ctx context.Context
-		ID  uuid.UUID
-	}
-	mock.lockFetchByColumnID.RLock()
-	calls = mock.calls.FetchByColumnID
-	mock.lockFetchByColumnID.RUnlock()
-	return calls
-}
-
-// FetchByProjectID calls FetchByProjectIDFunc.
-func (mock *TaskUsecaseMock) FetchByProjectID(ctx context.Context, id uuid.UUID) ([]domain.Task, error) {
-	if mock.FetchByProjectIDFunc == nil {
-		panic("TaskUsecaseMock.FetchByProjectIDFunc: method is nil but TaskUsecase.FetchByProjectID was just called")
-	}
-	callInfo := struct {
-		Ctx context.Context
-		ID  uuid.UUID
-	}{
-		Ctx: ctx,
-		ID:  id,
-	}
-	mock.lockFetchByProjectID.Lock()
-	mock.calls.FetchByProjectID = append(mock.calls.FetchByProjectID, callInfo)
-	mock.lockFetchByProjectID.Unlock()
-	return mock.FetchByProjectIDFunc(ctx, id)
-}
-
-// FetchByProjectIDCalls gets all the calls that were made to FetchByProjectID.
-// Check the length with:
-//     len(mockedTaskUsecase.FetchByProjectIDCalls())
-func (mock *TaskUsecaseMock) FetchByProjectIDCalls() []struct {
-	Ctx context.Context
-	ID  uuid.UUID
-} {
-	var calls []struct {
-		Ctx context.Context
-		ID  uuid.UUID
-	}
-	mock.lockFetchByProjectID.RLock()
-	calls = mock.calls.FetchByProjectID
-	mock.lockFetchByProjectID.RUnlock()
 	return calls
 }
 
@@ -348,6 +355,92 @@ func (mock *TaskUsecaseMock) GetByIDCalls() []struct {
 	return calls
 }
 
+// MoveLeft calls MoveLeftFunc.
+func (mock *TaskUsecaseMock) MoveLeft(ctx context.Context, old *domain.Task, tk *domain.Task, tks []domain.Task) error {
+	if mock.MoveLeftFunc == nil {
+		panic("TaskUsecaseMock.MoveLeftFunc: method is nil but TaskUsecase.MoveLeft was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		Old *domain.Task
+		Tk  *domain.Task
+		Tks []domain.Task
+	}{
+		Ctx: ctx,
+		Old: old,
+		Tk:  tk,
+		Tks: tks,
+	}
+	mock.lockMoveLeft.Lock()
+	mock.calls.MoveLeft = append(mock.calls.MoveLeft, callInfo)
+	mock.lockMoveLeft.Unlock()
+	return mock.MoveLeftFunc(ctx, old, tk, tks)
+}
+
+// MoveLeftCalls gets all the calls that were made to MoveLeft.
+// Check the length with:
+//     len(mockedTaskUsecase.MoveLeftCalls())
+func (mock *TaskUsecaseMock) MoveLeftCalls() []struct {
+	Ctx context.Context
+	Old *domain.Task
+	Tk  *domain.Task
+	Tks []domain.Task
+} {
+	var calls []struct {
+		Ctx context.Context
+		Old *domain.Task
+		Tk  *domain.Task
+		Tks []domain.Task
+	}
+	mock.lockMoveLeft.RLock()
+	calls = mock.calls.MoveLeft
+	mock.lockMoveLeft.RUnlock()
+	return calls
+}
+
+// MoveRight calls MoveRightFunc.
+func (mock *TaskUsecaseMock) MoveRight(ctx context.Context, old *domain.Task, tk *domain.Task, tks []domain.Task) error {
+	if mock.MoveRightFunc == nil {
+		panic("TaskUsecaseMock.MoveRightFunc: method is nil but TaskUsecase.MoveRight was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		Old *domain.Task
+		Tk  *domain.Task
+		Tks []domain.Task
+	}{
+		Ctx: ctx,
+		Old: old,
+		Tk:  tk,
+		Tks: tks,
+	}
+	mock.lockMoveRight.Lock()
+	mock.calls.MoveRight = append(mock.calls.MoveRight, callInfo)
+	mock.lockMoveRight.Unlock()
+	return mock.MoveRightFunc(ctx, old, tk, tks)
+}
+
+// MoveRightCalls gets all the calls that were made to MoveRight.
+// Check the length with:
+//     len(mockedTaskUsecase.MoveRightCalls())
+func (mock *TaskUsecaseMock) MoveRightCalls() []struct {
+	Ctx context.Context
+	Old *domain.Task
+	Tk  *domain.Task
+	Tks []domain.Task
+} {
+	var calls []struct {
+		Ctx context.Context
+		Old *domain.Task
+		Tk  *domain.Task
+		Tks []domain.Task
+	}
+	mock.lockMoveRight.RLock()
+	calls = mock.calls.MoveRight
+	mock.lockMoveRight.RUnlock()
+	return calls
+}
+
 // Store calls StoreFunc.
 func (mock *TaskUsecaseMock) Store(in1 context.Context, in2 *domain.Task) error {
 	if mock.StoreFunc == nil {
@@ -380,6 +473,41 @@ func (mock *TaskUsecaseMock) StoreCalls() []struct {
 	mock.lockStore.RLock()
 	calls = mock.calls.Store
 	mock.lockStore.RUnlock()
+	return calls
+}
+
+// StoreComment calls StoreCommentFunc.
+func (mock *TaskUsecaseMock) StoreComment(ctx context.Context, cm *domain.Comment) error {
+	if mock.StoreCommentFunc == nil {
+		panic("TaskUsecaseMock.StoreCommentFunc: method is nil but TaskUsecase.StoreComment was just called")
+	}
+	callInfo := struct {
+		Ctx context.Context
+		Cm  *domain.Comment
+	}{
+		Ctx: ctx,
+		Cm:  cm,
+	}
+	mock.lockStoreComment.Lock()
+	mock.calls.StoreComment = append(mock.calls.StoreComment, callInfo)
+	mock.lockStoreComment.Unlock()
+	return mock.StoreCommentFunc(ctx, cm)
+}
+
+// StoreCommentCalls gets all the calls that were made to StoreComment.
+// Check the length with:
+//     len(mockedTaskUsecase.StoreCommentCalls())
+func (mock *TaskUsecaseMock) StoreCommentCalls() []struct {
+	Ctx context.Context
+	Cm  *domain.Comment
+} {
+	var calls []struct {
+		Ctx context.Context
+		Cm  *domain.Comment
+	}
+	mock.lockStoreComment.RLock()
+	calls = mock.calls.StoreComment
+	mock.lockStoreComment.RUnlock()
 	return calls
 }
 

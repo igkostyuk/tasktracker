@@ -27,8 +27,10 @@ func New(us domain.TaskUsecase) chi.Router {
 	r.Post("/", handler.Store)
 	r.Route("/{taskID}", func(r chi.Router) {
 		r.Get("/", handler.GetByID)
+		r.Put("/", handler.Update)
 		r.Delete("/", handler.Delete)
 		r.Get("/comments", handler.FetchComments)
+		r.Post("/comments", handler.StoreComment)
 	})
 
 	return r
@@ -81,6 +83,102 @@ func (t *taskHandler) FetchComments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	web.Respond(w, r, comments, http.StatusOK)
+}
+
+func isCommentRequestValid(m *domain.Comment) (bool, error) {
+	validate := validator.New()
+	err := validate.Struct(m)
+	if err != nil {
+		return false, fmt.Errorf("validation: %w", err)
+	}
+
+	return true, nil
+}
+
+// Store godoc
+// @Summary Add a comment
+// @Description add by json comment
+// @Tags comments
+// @Accept  json
+// @Produce  json
+// @Param  id path string true "task ID" format(uuid)
+// @Param project body domain.Comment true "Add comment"
+// @Success 200 {object} domain.Comment
+// @Failure 400 {object} web.HTTPError
+// @Failure 404 {object} web.HTTPError
+// @Failure 409 {object} web.HTTPError
+// @Failure 422 {object} web.HTTPError
+// @Failure 500 {object} web.HTTPError
+// @Router /tasks/{id}/comments [post]
+// Store will store the comment by given request body.
+func (t *taskHandler) StoreComment(w http.ResponseWriter, r *http.Request) {
+	id, err := uuid.Parse(chi.URLParam(r, "taskID"))
+	if err != nil {
+		web.RespondError(w, r, domain.ErrNotFound, http.StatusNotFound)
+
+		return
+	}
+	var comment domain.Comment
+	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
+		web.RespondError(w, r, err, http.StatusUnprocessableEntity)
+
+		return
+	}
+	comment.TaskID = id
+	if ok, err := isCommentRequestValid(&comment); !ok {
+		web.RespondError(w, r, err, http.StatusBadRequest)
+
+		return
+	}
+	if err := t.taskUsecase.StoreComment(r.Context(), &comment); err != nil {
+		web.RespondError(w, r, err, getStatusCode(err))
+
+		return
+	}
+	web.Respond(w, r, comment, http.StatusOK)
+}
+
+// Update godoc
+// @Summary Update a task
+// @Description update by json task
+// @Tags tasks
+// @Accept  json
+// @Produce  json
+// @Param  id path string true "task ID" format(uuid)
+// @Param project body domain.Task true "Update task"
+// @Success 200 {object} domain.Task
+// @Failure 400 {object} web.HTTPError
+// @Failure 404 {object} web.HTTPError
+// @Failure 409 {object} web.HTTPError
+// @Failure 422 {object} web.HTTPError
+// @Failure 500 {object} web.HTTPError
+// @Router /tasks/{id} [put]
+// Update will update the task by given request body.
+func (t *taskHandler) Update(w http.ResponseWriter, r *http.Request) {
+	id, err := uuid.Parse(chi.URLParam(r, "taskID"))
+	if err != nil {
+		web.RespondError(w, r, domain.ErrNotFound, http.StatusNotFound)
+
+		return
+	}
+	var task domain.Task
+	if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
+		web.RespondError(w, r, err, http.StatusUnprocessableEntity)
+
+		return
+	}
+	task.ID = id
+	if ok, err := isRequestValid(&task); !ok {
+		web.RespondError(w, r, err, http.StatusBadRequest)
+
+		return
+	}
+	if err := t.taskUsecase.Update(r.Context(), &task); err != nil {
+		web.RespondError(w, r, err, getStatusCode(err))
+
+		return
+	}
+	web.Respond(w, r, task, http.StatusOK)
 }
 
 // GetByID godoc
@@ -149,7 +247,11 @@ func (t *taskHandler) Store(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := t.taskUsecase.Store(r.Context(), &task); err != nil {
-		web.RespondError(w, r, err, getStatusCode(err))
+		sc := getStatusCode(err)
+		if errors.Is(domain.ErrNotFound, err) {
+			sc = http.StatusBadRequest
+		}
+		web.RespondError(w, r, err, sc)
 
 		return
 	}

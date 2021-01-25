@@ -315,8 +315,8 @@ var doc = `{
                     }
                 }
             },
-            "post": {
-                "description": "add by json comment",
+            "put": {
+                "description": "update by json comment",
                 "consumes": [
                     "application/json"
                 ],
@@ -326,10 +326,10 @@ var doc = `{
                 "tags": [
                     "comments"
                 ],
-                "summary": "Add a comment",
+                "summary": "Update a comment",
                 "parameters": [
                     {
-                        "description": "Add comment",
+                        "description": "Update comment",
                         "name": "project",
                         "in": "body",
                         "required": true,
@@ -713,7 +713,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "projects"
+                    "columns"
                 ],
                 "summary": "Get columns by project id",
                 "parameters": [
@@ -834,7 +834,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "projects"
+                    "tasks"
                 ],
                 "summary": "Get tasks by project id",
                 "parameters": [
@@ -1028,6 +1028,76 @@ var doc = `{
                     }
                 }
             },
+            "put": {
+                "description": "update by json task",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Update a task",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update task",
+                        "name": "project",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.Task"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Task"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/web.HTTPError"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/web.HTTPError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/web.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/web.HTTPError"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "description": "Delete by task ID",
                 "produces": [
@@ -1120,6 +1190,76 @@ var doc = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "description": "add by json comment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comments"
+                ],
+                "summary": "Add a comment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "task ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Add comment",
+                        "name": "project",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.Comment"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.Comment"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/web.HTTPError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/web.HTTPError"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/web.HTTPError"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/web.HTTPError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/web.HTTPError"
+                        }
+                    }
+                }
             }
         }
     },
@@ -1153,16 +1293,20 @@ var doc = `{
         "domain.Comment": {
             "type": "object",
             "required": [
-                "task_id",
                 "text"
             ],
             "properties": {
+                "created_at": {
+                    "type": "string",
+                    "readOnly": true
+                },
                 "id": {
                     "type": "string",
                     "readOnly": true
                 },
                 "task_id": {
-                    "type": "string"
+                    "type": "string",
+                    "readOnly": true
                 },
                 "text": {
                     "type": "string"

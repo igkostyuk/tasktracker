@@ -20,13 +20,15 @@ type Task struct {
 // TaskUsecase represent the task's usecases.
 type TaskUsecase interface {
 	Fetch(ctx context.Context) ([]Task, error)
-	FetchByColumnID(ctx context.Context, id uuid.UUID) ([]Task, error)
-	FetchByProjectID(ctx context.Context, id uuid.UUID) ([]Task, error)
 	GetByID(ctx context.Context, id uuid.UUID) (Task, error)
 	Update(ctx context.Context, tk *Task) error
+	ChangeColumn(ctx context.Context, old, tk *Task) error
+	MoveRight(ctx context.Context, old, tk *Task, tks []Task) error
+	MoveLeft(ctx context.Context, old, tk *Task, tks []Task) error
 	Store(context.Context, *Task) error
 	Delete(ctx context.Context, id uuid.UUID) error
 	FetchComments(ctx context.Context, id uuid.UUID) ([]Comment, error)
+	StoreComment(ctx context.Context, cm *Comment) error
 }
 
 // TaskRepository represent the project's repository contract.

@@ -145,12 +145,12 @@ func (c *columnHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var column domain.Column
-	column.ID = id
 	if err := json.NewDecoder(r.Body).Decode(&column); err != nil {
 		web.RespondError(w, r, err, http.StatusUnprocessableEntity)
 
 		return
 	}
+	column.ID = id
 	if ok, err := isRequestValid(&column); !ok {
 		web.RespondError(w, r, err, http.StatusBadRequest)
 

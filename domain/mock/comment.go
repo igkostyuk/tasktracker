@@ -32,9 +32,6 @@ var _ domain.CommentUsecase = &CommentUsecaseMock{}
 //             GetByIDFunc: func(ctx context.Context, id uuid.UUID) (domain.Comment, error) {
 // 	               panic("mock out the GetByID method")
 //             },
-//             StoreFunc: func(in1 context.Context, in2 *domain.Comment) error {
-// 	               panic("mock out the Store method")
-//             },
 //             UpdateFunc: func(ctx context.Context, tk *domain.Comment) error {
 // 	               panic("mock out the Update method")
 //             },
@@ -56,9 +53,6 @@ type CommentUsecaseMock struct {
 
 	// GetByIDFunc mocks the GetByID method.
 	GetByIDFunc func(ctx context.Context, id uuid.UUID) (domain.Comment, error)
-
-	// StoreFunc mocks the Store method.
-	StoreFunc func(in1 context.Context, in2 *domain.Comment) error
 
 	// UpdateFunc mocks the Update method.
 	UpdateFunc func(ctx context.Context, tk *domain.Comment) error
@@ -91,13 +85,6 @@ type CommentUsecaseMock struct {
 			// ID is the id argument value.
 			ID uuid.UUID
 		}
-		// Store holds details about calls to the Store method.
-		Store []struct {
-			// In1 is the in1 argument value.
-			In1 context.Context
-			// In2 is the in2 argument value.
-			In2 *domain.Comment
-		}
 		// Update holds details about calls to the Update method.
 		Update []struct {
 			// Ctx is the ctx argument value.
@@ -110,7 +97,6 @@ type CommentUsecaseMock struct {
 	lockFetch         sync.RWMutex
 	lockFetchByTaskID sync.RWMutex
 	lockGetByID       sync.RWMutex
-	lockStore         sync.RWMutex
 	lockUpdate        sync.RWMutex
 }
 
@@ -247,41 +233,6 @@ func (mock *CommentUsecaseMock) GetByIDCalls() []struct {
 	mock.lockGetByID.RLock()
 	calls = mock.calls.GetByID
 	mock.lockGetByID.RUnlock()
-	return calls
-}
-
-// Store calls StoreFunc.
-func (mock *CommentUsecaseMock) Store(in1 context.Context, in2 *domain.Comment) error {
-	if mock.StoreFunc == nil {
-		panic("CommentUsecaseMock.StoreFunc: method is nil but CommentUsecase.Store was just called")
-	}
-	callInfo := struct {
-		In1 context.Context
-		In2 *domain.Comment
-	}{
-		In1: in1,
-		In2: in2,
-	}
-	mock.lockStore.Lock()
-	mock.calls.Store = append(mock.calls.Store, callInfo)
-	mock.lockStore.Unlock()
-	return mock.StoreFunc(in1, in2)
-}
-
-// StoreCalls gets all the calls that were made to Store.
-// Check the length with:
-//     len(mockedCommentUsecase.StoreCalls())
-func (mock *CommentUsecaseMock) StoreCalls() []struct {
-	In1 context.Context
-	In2 *domain.Comment
-} {
-	var calls []struct {
-		In1 context.Context
-		In2 *domain.Comment
-	}
-	mock.lockStore.RLock()
-	calls = mock.calls.Store
-	mock.lockStore.RUnlock()
 	return calls
 }
 

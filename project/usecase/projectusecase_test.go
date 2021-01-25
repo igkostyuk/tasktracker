@@ -145,7 +145,7 @@ func TestStoreColumn(t *testing.T) {
 	}
 }
 
-// nolint:exhaustivestruct
+// nolint:exhaustivestruct,funlen
 func TestStoreColumnErrors(t *testing.T) {
 	is := helper.New(t)
 

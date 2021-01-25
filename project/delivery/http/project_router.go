@@ -61,7 +61,7 @@ func (p *projectHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 // FetchColumns godoc
 // @Summary Get columns by project id
 // @Description get columns by project id
-// @Tags projects
+// @Tags columns
 // @Produce  json
 // @Param  id path string true "project ID" format(uuid)
 // @Success 200 {array} domain.Column
@@ -120,12 +120,12 @@ func (p *projectHandler) StoreColumn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var column domain.Column
-	column.ProjectID = id
 	if err := json.NewDecoder(r.Body).Decode(&column); err != nil {
 		web.RespondError(w, r, err, http.StatusUnprocessableEntity)
 
 		return
 	}
+	column.ProjectID = id
 	if ok, err := isColumnRequestValid(&column); !ok {
 		web.RespondError(w, r, err, http.StatusBadRequest)
 
@@ -142,7 +142,7 @@ func (p *projectHandler) StoreColumn(w http.ResponseWriter, r *http.Request) {
 // FetchTasks godoc
 // @Summary Get tasks by project id
 // @Description get tasks by project id
-// @Tags projects
+// @Tags tasks
 // @Produce  json
 // @Param  id path string true "project ID" format(uuid)
 // @Success 200 {array} domain.Task
@@ -261,12 +261,12 @@ func (p *projectHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var project domain.Project
-	project.ID = id
 	if err := json.NewDecoder(r.Body).Decode(&project); err != nil {
 		web.RespondError(w, r, err, http.StatusUnprocessableEntity)
 
 		return
 	}
+	project.ID = id
 	if ok, err := isRequestValid(&project); !ok {
 		web.RespondError(w, r, err, http.StatusBadRequest)
 
