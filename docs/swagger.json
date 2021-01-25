@@ -214,7 +214,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "columns"
+                    "tasks"
                 ],
                 "summary": "Get tasks by column id",
                 "parameters": [
@@ -1131,7 +1131,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "tasks"
+                    "comments"
                 ],
                 "summary": "Get comments by task id",
                 "parameters": [

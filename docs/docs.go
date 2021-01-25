@@ -231,7 +231,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "columns"
+                    "tasks"
                 ],
                 "summary": "Get tasks by column id",
                 "parameters": [
@@ -1148,7 +1148,7 @@ var doc = `{
                     "application/json"
                 ],
                 "tags": [
-                    "tasks"
+                    "comments"
                 ],
                 "summary": "Get comments by task id",
                 "parameters": [

@@ -60,7 +60,7 @@ func (t *taskHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 // FetchComments godoc
 // @Summary Get comments by task id
 // @Description get tasks by task id
-// @Tags tasks
+// @Tags comments
 // @Produce  json
 // @Param  id path string true "task ID" format(uuid)
 // @Success 200 {array} domain.Task

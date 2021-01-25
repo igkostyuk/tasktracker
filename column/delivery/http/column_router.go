@@ -58,7 +58,7 @@ func (c *columnHandler) Fetch(w http.ResponseWriter, r *http.Request) {
 // FetchTasks godoc
 // @Summary Get tasks by column id
 // @Description get tasks by column id
-// @Tags columns
+// @Tags tasks
 // @Produce  json
 // @Param  id path string true "column ID" format(uuid)
 // @Success 200 {array} domain.Task
