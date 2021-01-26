@@ -1,0 +1,18 @@
+# Build the Go Binary.
+FROM golang:1.15.6 as build_tasktracker-api
+ENV CGO_ENABLED 0
+ARG VCS_REF
+
+RUN mkdir -p /service
+WORKDIR /service
+COPY . .
+
+WORKDIR /service/app
+RUN go build -o tasktracker-api -ldflags "-X main.build=${VCS_REF}"
+
+FROM alpine:3.12
+ARG BUILD_DATE
+ARG VCS_REF
+COPY --from=build_tasktracker-api /service/app /service
+WORKDIR /service
+CMD ["./tasktracker-api"]
