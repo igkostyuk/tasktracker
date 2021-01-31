@@ -49,13 +49,13 @@ func (t *taskRepository) fetch(ctx context.Context, query string, args ...interf
 }
 
 func (t *taskRepository) Fetch(ctx context.Context) ([]domain.Task, error) {
-	query := `SELECT id, position, name, description, colum_id FROM tasks`
+	query := `SELECT id, position, name, description, colum_id FROM tasks ORDER BY position`
 
 	return t.fetch(ctx, query)
 }
 
 func (t *taskRepository) FetchByColumnID(ctx context.Context, id uuid.UUID) ([]domain.Task, error) {
-	query := `SELECT id, position, name, description, colum_id FROM tasks WHERE colum_id = $1`
+	query := `SELECT id, position, name, description, colum_id FROM tasks WHERE colum_id = $1 ORDER BY position`
 
 	return t.fetch(ctx, query, id)
 }
@@ -98,7 +98,7 @@ func (t *taskRepository) Update(ctx context.Context, tks ...domain.Task) error {
 	if err != nil {
 		return fmt.Errorf("tx begin: %w", err)
 	}
-	query := `UPDATE tasks SET position=$2, name=$3, description=$4, colum_id=$5 FROM tasks WHERE id = $1`
+	query := `UPDATE tasks SET position=$2, name=$3, description=$4, colum_id=$5 WHERE id = $1`
 	stmt, err := txn.Prepare(query)
 	if err != nil {
 		return fmt.Errorf("tx prepare: %w", err)
