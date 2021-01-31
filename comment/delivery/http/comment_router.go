@@ -98,15 +98,16 @@ func isRequestValid(m *domain.Comment) (bool, error) {
 // @Tags comments
 // @Accept  json
 // @Produce  json
-// @Param project body domain.Comment true "Update comment"
+// @Param  id path string true "comment ID" format(uuid)
+// @Param comment body domain.Comment true "Update comment"
 // @Success 200 {object} domain.Comment
 // @Failure 400 {object} web.HTTPError
 // @Failure 404 {object} web.HTTPError
 // @Failure 409 {object} web.HTTPError
 // @Failure 422 {object} web.HTTPError
 // @Failure 500 {object} web.HTTPError
-// @Router /comments [put]
-// Update will update the comment by given request body.
+// @Router /comments/{id} [put]
+// Update will update the comment by given id and request body.
 func (c *commentHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "commentID"))
 	if err != nil {

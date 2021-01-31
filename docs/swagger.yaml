@@ -64,7 +64,6 @@ definitions:
     - column_id
     - description
     - name
-    - position
     type: object
   web.HTTPError:
     properties:
@@ -272,47 +271,6 @@ paths:
       summary: Get all comments
       tags:
       - comments
-    put:
-      consumes:
-      - application/json
-      description: update by json comment
-      parameters:
-      - description: Update comment
-        in: body
-        name: project
-        required: true
-        schema:
-          $ref: '#/definitions/domain.Comment'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/domain.Comment'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/web.HTTPError'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/web.HTTPError'
-        "409":
-          description: Conflict
-          schema:
-            $ref: '#/definitions/web.HTTPError'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/web.HTTPError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/web.HTTPError'
-      summary: Update a comment
-      tags:
-      - comments
   /comments/{id}:
     delete:
       description: Delete by comment ID
@@ -371,6 +329,53 @@ paths:
           schema:
             $ref: '#/definitions/web.HTTPError'
       summary: Show a comment
+      tags:
+      - comments
+    put:
+      consumes:
+      - application/json
+      description: update by json comment
+      parameters:
+      - description: comment ID
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update comment
+        in: body
+        name: comment
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Comment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.Comment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/web.HTTPError'
+      summary: Update a comment
       tags:
       - comments
   /projects:
