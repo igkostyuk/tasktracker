@@ -85,8 +85,8 @@ func (c *commentRepository) GetByID(ctx context.Context, id uuid.UUID) (domain.C
 }
 
 func (c *commentRepository) Update(ctx context.Context, cm *domain.Comment) error {
-	query := `UPDATE comments SET text=$2, task_id=$3 FROM comments WHERE id = $1`
-	_, err := c.db.ExecContext(ctx, query, cm.ID, cm.Text, cm.TaskID)
+	query := `UPDATE comments SET text=$2 WHERE id = $1`
+	_, err := c.db.ExecContext(ctx, query, cm.ID, cm.Text)
 	if err != nil {
 		return fmt.Errorf("update error: %w", err)
 	}

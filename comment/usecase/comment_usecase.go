@@ -26,10 +26,12 @@ func (c *commentUsecase) GetByID(ctx context.Context, id uuid.UUID) (domain.Comm
 }
 
 func (c *commentUsecase) Update(ctx context.Context, cm *domain.Comment) error {
-	if _, err := c.commentRepo.GetByID(ctx, cm.ID); err != nil {
+	old, err := c.commentRepo.GetByID(ctx, cm.ID)
+	if err != nil {
 		return fmt.Errorf("get by id comment: %w", err)
 	}
-
+	cm.TaskID = old.TaskID
+	cm.CreatedAt = old.CreatedAt
 	return c.commentRepo.Update(ctx, cm)
 }
 
